@@ -189,7 +189,9 @@ char *sLevel, *curdir, *outfilename = NULL;
 FILE *outfile;
 int *dirs, maxdirs;
 
+#ifndef __APPLE__             // OS X doesn't need this
 extern size_t MB_CUR_MAX;
+#endif
 
 int main(int argc, char **argv)
 {
