@@ -1,0 +1,16 @@
+# $Copyright: $
+# Copyright (c) 1996 - 2004 by Steve Baker
+# All Rights reserved
+#
+# This software is provided as is without any express or implied
+# warranties, including, without limitation, the implied warranties
+# of merchant-ability and fitness for a particular purpose.
+
+CC=gcc
+#CFLAGS=-ggdb -Wall -DLINUX_BIGFILE
+CFLAGS=-O2 -Wall -fomit-frame-pointer -DLINUX_BIGFILE
+LDFLAGS=-s
+
+# Uncomment for FreeBSD:
+#CC=gcc
+#CFLAGS=-O2 -Wall -fomit-frame-pointer

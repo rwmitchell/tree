@@ -1,0 +1,6 @@
+# $Id$
+# Uncomment for OS X:
+
+CC=cc
+CFLAGS=-O2 -Wall -fomit-frame-pointer -no-cpp-precomp
+LDFLAGS=
