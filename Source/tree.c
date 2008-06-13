@@ -30,7 +30,8 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/stat.h>
+//#include <sys/stat.h>
+#include "stat.h"
 #include <dirent.h>
 #include <sys/file.h>
 #include <ctype.h>
@@ -466,7 +467,7 @@ int main(int argc, char **argv)
 	saveino(st.st_ino, st.st_dev);
 	if (colorize) colored = color(st.st_mode,dirname[i],n<0,FALSE);
       }
-      if (!Hflag) printit(dirname[i]);
+      if (!Hflag) printit((unsigned char *)dirname[i]);
       if (colored) fprintf(outfile,"%s",endcode);
       if (!Hflag) listdir(dirname[i],&dtotal,&ftotal,0,0);
       else {
@@ -608,7 +609,7 @@ void listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
     if (!noindent) indent();
 
     path[0] = 0;
-    if (inodeflag) sprintf(path," %7ld",(*dir)->inode);
+    if (inodeflag) sprintf(path," %7ld",(long int) (*dir)->inode);
     if (devflag) sprintf(path+strlen(path), " %3d", (int)(*dir)->dev);
 #ifdef __EMX__
     if (pflag) sprintf(path+strlen(path), " %s",prot((*dir)->attr));
@@ -708,7 +709,7 @@ void listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 	  }
 	}
       }
-    } else printit(path);
+    } else printit((unsigned char *)path);
 
     if (colored) fprintf(outfile,"%s",endcode);
     if (Fflag && !(*dir)->lnk) {
@@ -721,7 +722,7 @@ void listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
     if ((*dir)->lnk && !Hflag) {
       fprintf(outfile,"%s->%s",sp,sp);
       if (colorize) colored = color((*dir)->lnkmode,(*dir)->lnk,(*dir)->orphan,TRUE);
-      printit((*dir)->lnk);
+      printit((unsigned char *)(*dir)->lnk);
       if (colored) fprintf(outfile,"%s",endcode);
       if (Fflag) {
 	m = (*dir)->lnkmode & S_IFMT;
@@ -1175,8 +1176,8 @@ void printit(unsigned char *s)
   }
   if (MB_CUR_MAX > 1) {
     wchar_t *ws, *tp;
-    ws = xmalloc(sizeof(wchar_t)* (c=(strlen(s)+1)));
-    if (mbstowcs(ws,s,c) > 0) {
+    ws = xmalloc(sizeof(wchar_t)* (c=(strlen(( char *)s)+1)));
+    if (mbstowcs(ws,(char *)s,c) > 0) {
       for(tp=ws;*tp;tp++)
 	if (iswprint(*tp)) fprintf(outfile,"%lc",(wint_t)*tp);
 	else {
