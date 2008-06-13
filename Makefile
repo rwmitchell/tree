@@ -31,12 +31,26 @@ BINDIR=${prefix}/bin
 MAN=tree.1
 MANDIR=${prefix}/man/man1
 
-all:	tree
+SRC = ./SOURCE
+OBJ = ./obj
+DST = ./bin
 
-tree:	tree.o
-	$(CC) $(LDFLAGS) -o $(TREE_DEST) tree.o
+$(OBJ)/%.o:	$(SRC)/%.c
+	$(CC) -c $(CFLAGS) -o $@ $<
 
-tree.o:	tree.c
+all:	\
+	$(OBJ) \
+	$(DST) \
+	$(DST)/tree \
+
+$(DST)/tree:	$(OBJ)/tree.o
+	$(CC) $(LDFLAGS) -o  $@ $(OBJ)/tree.o
+
+$(OBJ):
+	mkdir $@
+
+$(DST):
+	mkdir $@
 
 clean:
 	if [ -x $(TREE_DEST) ]; then rm $(TREE_DEST); fi
