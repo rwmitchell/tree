@@ -30,8 +30,11 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
-//#include <sys/stat.h>
+#ifdef __APPLE__
 #include "stat.h"
+# else
+#include <sys/stat.h>
+#endif
 #include <dirent.h>
 #include <sys/file.h>
 #include <ctype.h>
