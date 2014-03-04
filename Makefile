@@ -31,7 +31,7 @@ BINDIR=${prefix}/bin
 MAN=tree.1
 MANDIR=${prefix}/man/man1
 
-SRC = ./SOURCE
+SRC = ./Source
 OBJ = ./obj
 DST = ./bin
 
