@@ -56,6 +56,7 @@ int   AGE_ftcnt = 0;
 unsigned long AGE_secs[32];  // 32 date colors
 time_t The_Time; // = time( NULL );
 off_t dusize = 0;
+const char *TF[] = { "False", "True" };
 
 #ifdef __EMX__
 const u_short ifmt[]={ FILE_ARCHIVED, FILE_DIRECTORY, FILE_SYSTEM, FILE_HIDDEN, FILE_READONLY, 0};
@@ -124,7 +125,8 @@ int main(int argc, char **argv)
   Dflag = qflag = Nflag = Qflag = Rflag = hflag = Hflag = siflag = cflag = FALSE;
   noindent = force_color = nocolor = xdev = noreport = nolinks = reverse = FALSE;
   ignorecase = matchdirs = dirsfirst = inodeflag = devflag = Xflag = Jflag = FALSE;
-  duflag = pruneflag = FALSE;
+  duflag = TRUE;
+  pruneflag = FALSE;
   flimit = 0;
   dirs = xmalloc(sizeof(int) * (maxdirs=4096));
   memset(dirs, 0, sizeof(int) * maxdirs);
@@ -383,8 +385,8 @@ int main(int argc, char **argv)
 	    }
 	    if (!strncmp("--du",argv[i],4)) {
 	      j = strlen(argv[i])-1;
-	      sflag = TRUE;
-	      duflag = TRUE;
+//     sflag = TRUE;
+	      duflag = FALSE;
 	      break;
 	    }
 	    if (!strncmp("--prune",argv[i],7)) {
@@ -735,7 +737,7 @@ void usage(int n)
 	"  ------- Input options -------\n"
 	"  --fromfile    Reads paths from files (.=stdin)\n"
 	"  ------- Miscellaneous options -------\n"
-        "  --du          Print 'du' sizes for directories\n"
+	"  --du          Disable 'du' sizes for directories\n"
 	"  --version     Print version and exit.\n"
 	"  --help        Print usage and this help message and exit.\n"
 	"  --            Options processing terminator.\n");
