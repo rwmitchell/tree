@@ -620,9 +620,10 @@ int main(int argc, char **argv) {
         fprintf(outfile,"\n%s%s used in ", sizebuf, hflag || siflag? "" : " bytes");
       } else fputc('\n', outfile);
       if (dflag)
-        fprintf(outfile,"%d director%s\n",dtotal,(dtotal==1? "y":"ies"));
+        fprintf(outfile,"%s%d%s director%s\n",FSCOLOR, dtotal,COL_clr, (dtotal==1? "y":"ies"));
       else
-        fprintf(outfile,"%d director%s, %d file%s\n",dtotal,(dtotal==1? "y":"ies"),ftotal,(ftotal==1? "":"s"));
+        fprintf(outfile,"%s%d%s director%s, %s%d%s file%s\n",
+          FSCOLOR, dtotal,COL_clr, (dtotal==1? "y":"ies"),FSCOLOR,ftotal,COL_clr,(ftotal==1? "":"s"));
     }
   }
 
