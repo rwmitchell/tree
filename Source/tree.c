@@ -114,8 +114,7 @@ int rwm_env2ft( char *env, char sep, unsigned long *age, char **col ) {
   return( cnt );
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   char **dirname = NULL;
   int i,j=0,k,n,optf,p,q,dtotal,ftotal,colored = false;
   struct stat st;
@@ -679,8 +678,7 @@ int main(int argc, char **argv)
   return 0;
 }
 
-void usage(int n)
-{
+void usage(int n) {
   /*     123456789!123456789!123456789!123456789!123456789!123456789!123456789!123456789! */
   /*     \t9!123456789!123456789!123456789!123456789!123456789!123456789!123456789! */
   fprintf(n < 2? stderr: stdout,
@@ -755,8 +753,7 @@ void usage(int n)
 }
 
 
-struct _info **read_dir(char *dir, int *n)
-{
+struct _info **read_dir(char *dir, int *n) {
   static char *path = NULL, *lbuf = NULL;
   static long pathsize, lbufsize;
   struct _info **dl;
@@ -866,8 +863,7 @@ struct _info **read_dir(char *dir, int *n)
  * This can and will use a large amount of memory for large directory trees
  * and also take some time.
  */
-struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **err)
-{
+struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **err) {
   char *path;
   long pathsize = 0;
   struct _info **dir, **sav, **p, *sp;
@@ -991,8 +987,7 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 }
 
 /* Sorting functions */
-int alnumsort(struct _info **a, struct _info **b)
-{
+int alnumsort(struct _info **a, struct _info **b) {
   int v;
 
   if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
@@ -1002,8 +997,7 @@ int alnumsort(struct _info **a, struct _info **b)
   return reverse? -v : v;
 }
 
-int versort(struct _info **a, struct _info **b)
-{
+int versort(struct _info **a, struct _info **b) {
   int v;
 
   if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
@@ -1013,8 +1007,7 @@ int versort(struct _info **a, struct _info **b)
   return reverse? -v : v;
 }
 
-int mtimesort(struct _info **a, struct _info **b)
-{
+int mtimesort(struct _info **a, struct _info **b) {
   int v;
 
   if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
@@ -1028,8 +1021,7 @@ int mtimesort(struct _info **a, struct _info **b)
   return reverse? -v : v;
 }
 
-int ctimesort(struct _info **a, struct _info **b)
-{
+int ctimesort(struct _info **a, struct _info **b) {
   int v;
 
   if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
@@ -1043,13 +1035,11 @@ int ctimesort(struct _info **a, struct _info **b)
   return reverse? -v : v;
 }
 
-int sizecmp(off_t a, off_t b)
-{
+int sizecmp(off_t a, off_t b) {
   return (a == b)? 0 : ((a < b)? 1 : -1);
 }
 
-int fsizesort(struct _info **a, struct _info **b)
-{
+int fsizesort(struct _info **a, struct _info **b) {
   int v;
 
   if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
@@ -1061,8 +1051,7 @@ int fsizesort(struct _info **a, struct _info **b)
 }
 
 
-void *xmalloc (size_t size)
-{
+void *xmalloc (size_t size) {
   register void *value = malloc (size);
   if (value == 0) {
     fprintf(stderr,"tree: virtual memory exhausted.\n");
@@ -1071,8 +1060,7 @@ void *xmalloc (size_t size)
   return value;
 }
 
-void *xrealloc (void *ptr, size_t size)
-{
+void *xrealloc (void *ptr, size_t size) {
   register void *value = realloc (ptr,size);
   if (value == 0) {
     fprintf(stderr,"tree: virtual memory exhausted.\n");
@@ -1081,8 +1069,7 @@ void *xrealloc (void *ptr, size_t size)
   return value;
 }
 
-void free_dir(struct _info **d)
-{
+void free_dir(struct _info **d) {
   int i;
 
   for(i=0;d[i];i++) {
@@ -1093,8 +1080,7 @@ void free_dir(struct _info **d)
   free(d);
 }
 
-char *gnu_getcwd()
-{
+char *gnu_getcwd() {
   int size = 100;
   char *buffer = (char *) xmalloc (size);
 
@@ -1109,8 +1095,7 @@ char *gnu_getcwd()
     }
 }
 
-static inline char cond_lower(char c)
-{
+static inline char cond_lower(char c) {
   return ignorecase ? tolower(c) : c;
 }
 
@@ -1123,8 +1108,7 @@ static inline char cond_lower(char c)
  *    0 on a mismatch
  *   -1 on a syntax error in the pattern
  */
-int patmatch(char *buf, char *pat)
-{
+int patmatch(char *buf, char *pat) {
   int match = 1,m,n;
   char *bar = strchr(pat, '|');
 
@@ -1202,8 +1186,7 @@ int patmatch(char *buf, char *pat)
  * They cried out for ANSI-lines (not really), but here they are, as an option
  * for the xterm and console capable among you, as a run-time option.
  */
-void indent(int maxlevel)
-{
+void indent(int maxlevel) {
   int i;
 
   if (ansilines) {
@@ -1232,11 +1215,10 @@ void indent(int maxlevel)
 
 
 #ifdef __EMX__
-char *prot(long m)
+// char *prot(long m) {     // XYZZY - 2019-12-26 commented only because having tis break 'splitfunc'
 #else
-char *prot(mode_t m)
+char *prot(mode_t m) {
 #endif
-{
 #ifdef __EMX__
   const u_short *p;
   static char buf[6];
@@ -1269,8 +1251,7 @@ char *prot(mode_t m)
 
 #define SIXMONTHS (6*31*24*60*60)
 
-char *do_date(time_t t)
-{
+char *do_date(time_t t) {
   static char buf[256],
               tmp[256];
   struct tm *tm;
@@ -1302,8 +1283,7 @@ char *do_date(time_t t)
 /**
  * Must fix this someday
  */
-void printit(char *s)
-{
+void printit(char *s) {
   int c;
 
   if (Nflag) {
@@ -1354,8 +1334,7 @@ void printit(char *s)
   if (Qflag) putc('"',outfile);
 }
 
-int psize(char *buf, off_t size)
-{
+int psize(char *buf, off_t size) {
   static char *iec_unit="BKMGTPEZY", *si_unit = "dkMGTPEZY";
   char *unit = siflag ? si_unit : iec_unit;
   int idx, usize = siflag ? 1000 : 1024;
@@ -1371,8 +1350,7 @@ int psize(char *buf, off_t size)
      FSCOLOR, (long long int)size, COL_clr );
 }
 
-char Ftype(mode_t mode)
-{
+char Ftype(mode_t mode) {
   int m = mode & S_IFMT;
   if (!dflag && m == S_IFDIR) return '/';
   else if (m == S_IFSOCK) return '=';
@@ -1385,8 +1363,7 @@ char Ftype(mode_t mode)
   return 0;
 }
 
-char *fillinfo(char *buf, struct _info *ent)
-{
+char *fillinfo(char *buf, struct _info *ent) {
   int n;
   buf[n=0] = 0;
   #ifdef __USE_FILE_OFFSET64
