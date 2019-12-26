@@ -163,7 +163,30 @@ void parse_dir_colors() {
 
   /*  if (!termmatch) colorize = false; */
 }
+void parse_env_colors() {    // RWM
+    char *env;
+extern
+char *FSCOLOR,
+     *TRCOLOR,
+     *AGE_cols[],
+     *COL_clr;
+extern
+int   AGE_ftcnt;
+extern
+unsigned long AGE_secs[];
 
+  env = getenv( "ELS_FS_COLOR" );     // color file size
+  if ( env ) asprintf( &FSCOLOR, "[%sm", env );
+
+  env = getenv( "ELS_FT_COLORS");     // color by file age
+
+  if ( env ) AGE_ftcnt = age_env2ft( env, ':', AGE_secs, AGE_cols );
+
+  env = getenv( "TREE_COLOR"   );     // tree color
+  if ( env ) asprintf( &TRCOLOR, "[%sm", env );
+
+  asprintf( &COL_clr, "[39m");
+}
 /*
  * You must free the pointer that is allocated by split() after you
  * are done using the array.
@@ -183,6 +206,22 @@ char **split(char *str, const char *delim, int *nwrds) {
   return w;
 }
 
+int age_env2ft( char *env, char sep, unsigned long *age, char **col ) {  // RWM
+  int  cnt = 0;
+  char *p1, *p2;
+
+  p1 = env;
+  while ( *p1 ) {
+    p2 = strchr( p1, sep );  // find separator
+   *p2 = '\0';               // truncate string
+
+   age[cnt] = strtoul( p1, NULL, 10 );
+   p1 = strchr( p1, '=' );
+   col[cnt++] = p1 + 1;
+   p1 = p2 + 1;
+  }
+  return( cnt );
+}
 int cmd(char *s) {
   static struct {
     char *cmd;

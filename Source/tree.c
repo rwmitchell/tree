@@ -97,23 +97,6 @@ extern bool colorize, ansilines, linktargetcolor;
 extern char *leftcode, *rightcode, *endcode;
 extern const struct linedraw *linedraw;
 
-int rwm_env2ft( char *env, char sep, unsigned long *age, char **col ) {
-  int  cnt = 0;
-  char *p1, *p2;
-
-  p1 = env;
-  while ( *p1 ) {
-    p2 = strchr( p1, sep );  // find separator
-   *p2 = '\0';               // truncate string
-
-   age[cnt] = strtoul( p1, NULL, 10 );
-   p1 = strchr( p1, '=' );
-   col[cnt++] = p1 + 1;
-   p1 = p2 + 1;
-  }
-  return( cnt );
-}
-
 int main(int argc, char **argv) {
   char **dirname = NULL;
   int i,j=0,k,n,optf,p,q,dtotal,ftotal,colored = false;
@@ -489,24 +472,8 @@ int main(int argc, char **argv) {
   }
   if (p) dirname[p] = NULL;
 
-  if ( !nocolor ) {
-    char *env;
-
-    env = getenv( "ELS_FS_COLOR" );     // color file size
-    if ( env ) asprintf( &FSCOLOR, "[%sm", env );
-
-    env = getenv( "ELS_FT_COLORS");     // color by file age
-
-    if ( env ) AGE_ftcnt = rwm_env2ft( env, ':', AGE_secs, AGE_cols );
-    The_Time = time( NULL );
-
-    env = getenv( "TREE_COLOR"   );     // tree color
-    if ( env ) asprintf( &TRCOLOR, "[%sm", env );
-
-    asprintf( &COL_clr, "[39m");
-//  printf("Using: %s : %sTEST%s\n", env, TRCOLOR, COL_clr );
-  }
-
+  if ( !nocolor ) parse_env_colors();
+  The_Time = time( NULL );
 
   if (outfilename == NULL) {
 #ifdef __EMX__

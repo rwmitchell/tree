@@ -118,6 +118,8 @@ struct extensions {
 struct linedraw {
   const char **name, *vert, *vert_left, *corner, *copy;
 };
+void parse_env_colors();    // RWM
+int age_env2ft( char *env, char sep, unsigned long *age, char **col );  // RWM
 
 /* Function prototypes: */
 /* tree.c */
