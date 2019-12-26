@@ -61,12 +61,13 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 {
   char *path;
   bool nlf = FALSE;
+  unsigned
   long pathsize = 0;
   struct _info **dir, **sav;
   struct stat sb;
   int t, n, mt;
 
-  if ((Level >= 0) && (lev > Level)) {
+  if ((Level >= 0) && (lev > (u_long) Level)) {
     if (!noindent) fputc('\n',outfile);
     return 0;
   }
@@ -93,15 +94,15 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
   }
 
   if (cmpfunc) qsort(dir,n,sizeof(struct _info *), cmpfunc);
-  if (lev >= maxdirs-1) {
-    dirs = xrealloc(dirs,sizeof(int) * (maxdirs += 1024));
+  if (lev >= (u_long) maxdirs-1) {
+    dirs = (int *) xrealloc(dirs,sizeof(int) * (maxdirs += 1024));
     memset(dirs+(maxdirs-1024), 0, sizeof(int) * 1024);
   }
   dirs[lev] = 1;
   if (!*(dir+1)) dirs[lev] = 2;
   if (!noindent) fprintf(outfile,"\n");
 
-  path = malloc(pathsize=4096);
+  path = (char *) malloc(pathsize=4096);
 
   while(*dir) {
     if (!noindent) xml_indent(lev);
@@ -114,12 +115,12 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 
     if (fflag) {
       if (sizeof(char) * (strlen(d)+strlen((*dir)->name)+2) > pathsize)
-        path=xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen((*dir)->name)+1024)));
+        path = (char *) xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen((*dir)->name)+1024)));
       if (!strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
       else sprintf(path,"%s/%s",d,(*dir)->name);
     } else {
       if (sizeof(char) * (strlen((*dir)->name)+1) > pathsize)
-        path=xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
+        path = (char *) xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
       sprintf(path,"%s",(*dir)->name);
     }
 
@@ -145,7 +146,7 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
             if (*(*dir)->lnk == '/')
               listdir((*dir)->lnk,dt,ft,lev+1,dev);
             else {
-              if (strlen(d)+strlen((*dir)->lnk)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
+              if (strlen(d)+strlen((*dir)->lnk)+2 > pathsize) path = (char *) xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
               if (fflag && !strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->lnk);
               else sprintf(path,"%s/%s",d,(*dir)->lnk);
               listdir(path,dt,ft,lev+1,dev);
@@ -154,7 +155,7 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
           }
         }
       } else if (!(xdev && dev != (*dir)->dev)) {
-        if (strlen(d)+strlen((*dir)->name)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
+        if (strlen(d)+strlen((*dir)->name)+2 > pathsize) path = (char *) xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
         if (fflag && !strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
         else sprintf(path,"%s/%s",d,(*dir)->name);
         saveino((*dir)->inode, (*dir)->dev);
@@ -206,7 +207,7 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
   if (!*(dir+1)) dirs[lev] = 2;
   fprintf(outfile,"\n");
 
-  path = malloc(pathsize=4096);
+  path = (char *) malloc(pathsize=4096);
 
   while(*dir) {
     if (!noindent) xml_indent(lev);
@@ -218,13 +219,13 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
     fprintf(outfile,"<%s", ftype[t]);
 
     if (fflag) {
-      if (sizeof(char) * (strlen(d)+strlen((*dir)->name)+2) > pathsize)
-        path=xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen((*dir)->name)+1024)));
+      if (sizeof(char) * (strlen(d)+strlen((*dir)->name)+2) > (u_long) pathsize)
+        path = (char *) xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen((*dir)->name)+1024)));
       if (!strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
       else sprintf(path,"%s/%s",d,(*dir)->name);
     } else {
-      if (sizeof(char) * (strlen((*dir)->name)+1) > pathsize)
-        path=xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
+      if (sizeof(char) * (strlen((*dir)->name)+1) > (u_long) pathsize)
+        path = (char *) xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
       sprintf(path,"%s",(*dir)->name);
     }
 
@@ -249,7 +250,8 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
     }
     if ((*dir)->child) {
       if (fflag) {
-        if (strlen(d)+strlen((*dir)->name)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
+        if (strlen(d)+strlen((*dir)->name)+2 > (u_long) pathsize)
+          path = (char *) xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
         if (!strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
         else sprintf(path,"%s/%s",d,(*dir)->name);
       }
@@ -297,8 +299,8 @@ void xml_fillinfo(struct _info *ent)
   #else
   if (pflag) fprintf(outfile, " mode=\"%04o\" prot=\"%s\"", ent->mode & (S_IRWXU|S_IRWXG|S_IRWXO|S_ISUID|S_ISGID|S_ISVTX), prot(ent->mode));
   #endif
-  if (uflag) fprintf(outfile, " user=\"%s\"", uidtoname(ent->uid));
-  if (gflag) fprintf(outfile, " group=\"%s\"", gidtoname(ent->gid));
+  if (uflag) fprintf(outfile, " user=\"%s\"",   uidtoname(ent->uid));
+  if (gflag) fprintf(outfile, " group=\"%s\"",  gidtoname(ent->gid));
   if (sflag) fprintf(outfile, " size=\"%lld\"", (long long int)(ent->size));
-  if (Dflag) fprintf(outfile, " time=\"%s\"", do_date(cflag? ent->ctime : ent->mtime));
+  if (Dflag) fprintf(outfile, " time=\"%s\"",   do_date(cflag? ent->ctime : ent->mtime));
 }

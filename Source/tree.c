@@ -19,8 +19,9 @@
 
 #include "tree.h"
 
-static char *version ="$Version: $ tree v1.8.0 (c) 1996 - 2018 by Steve Baker, Thomas Moore, Francesc Rocher, Florian Sesser, Kyosuke Tokoro $";
-static char *hversion="\t\t tree v1.8.0 %s 1996 - 2018 by Steve Baker and Thomas Moore <br>\n"
+const
+char *version ="$Version: $ tree v1.8.0 (c) 1996 - 2018 by Steve Baker, Thomas Moore, Francesc Rocher, Florian Sesser, Kyosuke Tokoro $",
+     *hversion="\t\t tree v1.8.0 %s 1996 - 2018 by Steve Baker and Thomas Moore <br>\n"
                       "\t\t HTML output hacked and copyleft %s 1998 by Francesc Rocher <br>\n"
                       "\t\t JSON output hacked and copyleft %s 2014 by Florian Sesser <br>\n"
                       "\t\t Charsets / OS/2 support %s 2001 by Kyosuke Tokoro\n";
@@ -32,8 +33,10 @@ bool Hflag, siflag, cflag, Xflag, Jflag, duflag, pruneflag;
 bool noindent, force_color, nocolor, xdev, noreport, nolinks, flimit, dirsfirst;
 bool ignorecase, matchdirs, fromfile;
 bool reverse;
-char *pattern = NULL, *ipattern = NULL, *host = NULL, *title = "Directory Tree", *sp = " ", *_nl = "\n";
-char *file_comment = "#", *file_pathsep = "/";
+char *pattern = NULL, *ipattern = NULL, *host = NULL;
+const
+char *title = "Directory Tree", *sp = " ", *_nl = "\n",
+     *file_comment = "#", *file_pathsep = "/";
 char *timefmt = NULL;
 const char *charset = NULL;
 
@@ -306,7 +309,7 @@ int main(int argc, char **argv)
               exit(0);
             }
             if (!strcmp("--version",argv[i])) {
-              char *v = version+12;
+              char *v = (char *) version+12;
               printf("%.*s\n",(int)strlen(v)-1,v);
               exit(0);
             }
@@ -552,7 +555,7 @@ int main(int argc, char **argv)
     Rflag = FALSE;
 
   if (Hflag) {
-    emit_html_header(charset, title, version);
+    emit_html_header(charset, (char *) title, (char *) version);
 
     fflag = FALSE;
     if (nolinks) {
