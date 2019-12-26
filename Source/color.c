@@ -47,14 +47,15 @@ enum {
 
 bool colorize = false, ansilines = false, linktargetcolor = false;
 char *term, termmatch = false, istty;
-char *leftcode = NULL, *rightcode = NULL, *endcode = NULL;
+char *leftcode      = NULL,  *rightcode    = NULL, *endcode     = NULL;
 
-char *norm_flgs = NULL, *file_flgs = NULL, *dir_flgs = NULL, *link_flgs = NULL;
-char *fifo_flgs = NULL, *door_flgs = NULL, *block_flgs = NULL, *char_flgs = NULL;
-char *orphan_flgs = NULL, *sock_flgs = NULL, *suid_flgs = NULL, *sgid_flgs = NULL;
-char *stickyow_flgs = NULL, *otherwr_flgs = NULL, *sticky_flgs = NULL;
-char *exec_flgs = NULL,  *missing_flgs = NULL;
+char *norm_flgs     = NULL,  *file_flgs    = NULL, *dir_flgs    = NULL, *link_flgs = NULL;
+char *fifo_flgs     = NULL,  *door_flgs    = NULL, *block_flgs  = NULL, *char_flgs = NULL;
+char *orphan_flgs   = NULL,  *sock_flgs    = NULL, *suid_flgs   = NULL, *sgid_flgs = NULL;
+char *stickyow_flgs = NULL,  *otherwr_flgs = NULL, *sticky_flgs = NULL;
+char *exec_flgs     = NULL,  *missing_flgs = NULL;
 
+const
 char *vgacolor[] = {
   "black", "red", "green", "yellow", "blue", "fuchsia", "aqua", "white",
   NULL, NULL,
@@ -65,16 +66,17 @@ struct colortable colortable[11];
 struct extensions *ext = NULL;
 const struct linedraw *linedraw;
 
-char **split(char *str, char *delim, int *nwrds);
+char **split(char *str, const char *delim, int *nwrds);
 int cmd(char *s);
 
 extern FILE *outfile;
 extern bool Hflag, force_color, nocolor;
 extern const char *charset;
 
-void parse_dir_colors()
-{
-  char buf[1025], **arg, **c, *colors, *s, *cc;
+void parse_dir_colors() {
+  const
+  char *s;
+  char buf[1025], **arg, **c, *colors, *cc;
   int i, n;
   struct extensions *e;
 
@@ -107,78 +109,40 @@ void parse_dir_colors()
   for(i=0;arg[i];i++) {
     c = split(arg[i],"=",&n);
     switch(cmd(c[0])) {
-      case COL_NORMAL:
-        if (c[1]) norm_flgs = scopy(c[1]);
-        break;
-      case COL_FILE:
-        if (c[1]) file_flgs = scopy(c[1]);
-        break;
-      case COL_DIR:
-        if (c[1]) dir_flgs = scopy(c[1]);
-        break;
+      case COL_NORMAL: if (c[1]) norm_flgs = scopy(c[1]); break;
+      case COL_FILE:   if (c[1]) file_flgs = scopy(c[1]); break;
+      case COL_DIR:    if (c[1])  dir_flgs = scopy(c[1]); break;
       case COL_LINK:
         if (c[1]) {
           if (strcasecmp("target",c[1]) == 0) {
             linktargetcolor = true;
-            link_flgs = "01;36"; /* Should never actually be used */
+            link_flgs = (char *) "01;36"; /* Should never actually be used */
           } else link_flgs = scopy(c[1]);
         }
         break;
-      case COL_FIFO:
-        if (c[1]) fifo_flgs = scopy(c[1]);
-        break;
-      case COL_DOOR:
-        if (c[1]) door_flgs = scopy(c[1]);
-        break;
-      case COL_BLK:
-        if (c[1]) block_flgs = scopy(c[1]);
-        break;
-      case COL_CHR:
-        if (c[1]) char_flgs = scopy(c[1]);
-        break;
-      case COL_ORPHAN:
-        if (c[1]) orphan_flgs = scopy(c[1]);
-        break;
-      case COL_SOCK:
-        if (c[1]) sock_flgs = scopy(c[1]);
-        break;
-      case COL_SETUID:
-        if (c[1]) suid_flgs = scopy(c[1]);
-        break;
-      case COL_SETGID:
-        if (c[1]) sgid_flgs = scopy(c[1]);
-        break;
-      case COL_STICKY_OTHER_WRITABLE:
-        if (c[1]) stickyow_flgs = scopy(c[1]);
-        break;
-      case COL_OTHER_WRITABLE:
-        if (c[1]) otherwr_flgs = scopy(c[1]);
-        break;
-      case COL_STICKY:
-        if (c[1]) sticky_flgs = scopy(c[1]);
-        break;
-      case COL_EXEC:
-        if (c[1]) exec_flgs = scopy(c[1]);
-        break;
-      case COL_MISSING:
-        if (c[1]) missing_flgs = scopy(c[1]);
-        break;
-      case COL_LEFTCODE:
-        if (c[1]) leftcode = scopy(c[1]);
-        break;
-      case COL_RIGHTCODE:
-        if (c[1]) rightcode = scopy(c[1]);
-        break;
-      case COL_ENDCODE:
-        if (c[1]) endcode = scopy(c[1]);
-        break;
+      case COL_FIFO:      if (c[1]) fifo_flgs    = scopy(c[1]); break;
+      case COL_DOOR:      if (c[1]) door_flgs    = scopy(c[1]); break;
+      case COL_BLK:       if (c[1]) block_flgs   = scopy(c[1]); break;
+      case COL_CHR:       if (c[1]) char_flgs    = scopy(c[1]); break;
+      case COL_ORPHAN:    if (c[1]) orphan_flgs  = scopy(c[1]); break;
+      case COL_SOCK:      if (c[1]) sock_flgs    = scopy(c[1]); break;
+      case COL_SETUID:    if (c[1]) suid_flgs    = scopy(c[1]); break;
+      case COL_SETGID:    if (c[1]) sgid_flgs    = scopy(c[1]); break;
+      case COL_STICKY_OTHER_WRITABLE: if (c[1]) stickyow_flgs = scopy(c[1]); break;
+      case COL_OTHER_WRITABLE:        if (c[1]) otherwr_flgs  = scopy(c[1]); break;
+      case COL_STICKY:    if (c[1]) sticky_flgs  = scopy(c[1]); break;
+      case COL_EXEC:      if (c[1]) exec_flgs    = scopy(c[1]); break;
+      case COL_MISSING:   if (c[1]) missing_flgs = scopy(c[1]); break;
+      case COL_LEFTCODE:  if (c[1]) leftcode     = scopy(c[1]); break;
+      case COL_RIGHTCODE: if (c[1]) rightcode    = scopy(c[1]); break;
+      case COL_ENDCODE:   if (c[1]) endcode      = scopy(c[1]); break;
       case DOT_EXTENSION:
         if (c[1]) {
-          e = xmalloc(sizeof(struct extensions));
-          e->ext = scopy(c[0]+1);
+          e           = xmalloc(sizeof(struct extensions));
+          e->ext      = scopy(c[0]+1);
           e->term_flg = scopy(c[1]);
-          e->nxt = ext;
-          ext = e;
+          e->nxt      = ext;
+          ext         = e;
         }
     }
     free(c);
@@ -186,7 +150,7 @@ void parse_dir_colors()
   free(arg);
 
   /* make sure at least norm_flgs is defined.  We're going to assume vt100 support */
-  if (!leftcode) leftcode = scopy("\033[");
+  if (!leftcode ) leftcode  = scopy("\033[");
   if (!rightcode) rightcode = scopy("m");
   if (!norm_flgs) norm_flgs = scopy("00");
 
@@ -204,8 +168,7 @@ void parse_dir_colors()
  * You must free the pointer that is allocated by split() after you
  * are done using the array.
  */
-char **split(char *str, char *delim, int *nwrds)
-{
+char **split(char *str, const char *delim, int *nwrds) {
   int n = 128;
   char **w = xmalloc(sizeof(char *) * n);
 
@@ -220,8 +183,7 @@ char **split(char *str, char *delim, int *nwrds)
   return w;
 }
 
-int cmd(char *s)
-{
+int cmd(char *s) {
   static struct {
     char *cmd;
     char cmdnum;
@@ -241,8 +203,7 @@ int cmd(char *s)
   return ERROR;
 }
 
-int color(u_short mode, char *name, bool orphan, bool islink)
-{
+int color(u_short mode, char *name, bool orphan, bool islink) {
   struct extensions *e;
   int l, xl;
 
@@ -337,8 +298,7 @@ int color(u_short mode, char *name, bool orphan, bool islink)
 /*
  * Charsets provided by Kyosuke Tokoro (NBG01720@nifty.ne.jp)
  */
-const char *getcharset(void)
-{
+const char *getcharset(void) {
   #ifndef __EMX__
   return getenv("TREE_CHARSET");
   #else
@@ -404,8 +364,7 @@ const char *getcharset(void)
       #endif
 }
 
-void initlinedraw(int flag)
-{
+void initlinedraw(int flag) {
   static const char*latin1_3[]={
     "ISO-8859-1", "ISO-8859-1:1987", "ISO_8859-1", "latin1", "l1", "IBM819",
     "CP819", "csISOLatin1", "ISO-8859-3", "ISO_8859-3:1988", "ISO_8859-3",
