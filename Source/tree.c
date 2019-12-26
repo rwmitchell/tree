@@ -116,7 +116,7 @@ int rwm_env2ft( char *env, char sep, unsigned long *age, char **col ) {
 int main(int argc, char **argv)
 {
   char **dirname = NULL;
-  int i,j=0,k,n,optf,p,q,dtotal,ftotal,colored = FALSE;
+  int i,j=0,k,n,optf,p,q,dtotal,ftotal,colored = false;
   struct stat st;
   char sizebuf[64], *stmp;
   off_t size = 0;
@@ -124,14 +124,14 @@ int main(int argc, char **argv)
   bool needfulltree;
 
   q = p = dtotal = ftotal = 0;
-  aflag = dflag = fflag = lflag = pflag = sflag = Fflag = uflag = gflag = FALSE;
-  Dflag = qflag = Nflag = Qflag = Rflag = hflag = Hflag = siflag = cflag = FALSE;
-  noindent = force_color = nocolor = xdev = noreport = nolinks = reverse = FALSE;
-  ignorecase = matchdirs = dirsfirst = inodeflag = devflag = Xflag = Jflag = FALSE;
-  duflag = TRUE;
-  pruneflag = FALSE;
+  aflag = dflag = fflag = lflag = pflag = sflag = Fflag = uflag = gflag = false;
+  Dflag = qflag = Nflag = Qflag = Rflag = hflag = Hflag = siflag = cflag = false;
+  noindent = force_color = nocolor = xdev = noreport = nolinks = reverse = false;
+  ignorecase = matchdirs = dirsfirst = inodeflag = devflag = Xflag = Jflag = false;
+  duflag = true;
+  pruneflag = false;
   flimit = 0;
-  dirs = xmalloc(sizeof(int) * (maxdirs=4096));
+  dirs = (int *) xmalloc(sizeof(int) * (maxdirs=4096));
   memset(dirs, 0, sizeof(int) * maxdirs);
   dirs[0] = 0;
   Level = -1;
@@ -155,64 +155,64 @@ int main(int argc, char **argv)
   memset(gtable,0,sizeof(gtable));
   memset(itable,0,sizeof(itable));
 
-  optf = TRUE;
+  optf = true;
   for(n=i=1;i<argc;i=n) {
     n++;
     if (optf && argv[i][0] == '-' && argv[i][1]) {
       for(j=1;argv[i][j];j++) {
         switch(argv[i][j]) {
         case 'N':
-          Nflag = TRUE;
+          Nflag = true;
           break;
         case 'q':
-          qflag = TRUE;
+          qflag = true;
           break;
         case 'Q':
-          Qflag = TRUE;
+          Qflag = true;
           break;
         case 'd':
-          dflag = TRUE;
+          dflag = true;
           break;
         case 'l':
-          lflag = TRUE;
+          lflag = true;
           break;
         case 's':
-          sflag = TRUE;
+          sflag = true;
           break;
         case 'h':
-          hflag = TRUE;
-          sflag = TRUE; /* Assume they also want -s */
+          hflag = true;
+          sflag = true; /* Assume they also want -s */
           break;
         case 'u':
-          uflag = TRUE;
+          uflag = true;
           break;
         case 'g':
-          gflag = TRUE;
+          gflag = true;
           break;
         case 'f':
-          fflag = TRUE;
+          fflag = true;
           break;
         case 'F':
-          Fflag = TRUE;
+          Fflag = true;
           break;
         case 'a':
-          aflag = TRUE;
+          aflag = true;
           break;
         case 'p':
-          pflag = TRUE;
+          pflag = true;
           break;
         case 'i':
-          noindent = TRUE;
+          noindent = true;
           _nl = "";
           break;
         case 'C':
-          force_color = TRUE;
+          force_color = true;
           break;
         case 'n':
-          nocolor = TRUE;
+          nocolor = true;
           break;
         case 'x':
-          xdev = TRUE;
+          xdev = true;
           break;
         case 'P':
           if (argv[n] == NULL) {
@@ -229,23 +229,23 @@ int main(int argc, char **argv)
           ipattern = argv[n++];
           break;
         case 'A':
-          ansilines = TRUE;
+          ansilines = true;
           break;
         case 'S':
           charset = "IBM437";
           break;
         case 'D':
-          Dflag = TRUE;
+          Dflag = true;
           break;
         case 't':
           cmpfunc = mtimesort;
           break;
         case 'c':
           cmpfunc = ctimesort;
-          cflag = TRUE;
+          cflag = true;
           break;
         case 'r':
-          reverse = TRUE;
+          reverse = true;
           break;
         case 'v':
           cmpfunc = versort;
@@ -254,15 +254,15 @@ int main(int argc, char **argv)
           cmpfunc = NULL;
           break;
         case 'X':
-          Hflag = FALSE;
-          Xflag = TRUE;
+          Hflag = false;
+          Xflag = true;
           break;
         case 'J':
-          Jflag = TRUE;
+          Jflag = true;
           break;
         case 'H':
-          Hflag = TRUE;
-          Xflag = FALSE;
+          Hflag = true;
+          Xflag = false;
           if (argv[n] == NULL) {
             fprintf(stderr,"tree: missing argument to -H option.\n");
             exit(1);
@@ -278,7 +278,7 @@ int main(int argc, char **argv)
           title = argv[n++];
           break;
         case 'R':
-          Rflag = TRUE;
+          Rflag = true;
           break;
         case 'L':
           if ((sLevel = argv[n++]) == NULL) {
@@ -301,7 +301,7 @@ int main(int argc, char **argv)
         case '-':
           if (j == 1) {
             if (!strcmp("--", argv[i])) {
-              optf = FALSE;
+              optf = false;
               break;
             }
             if (!strcmp("--help",argv[i])) {
@@ -315,27 +315,27 @@ int main(int argc, char **argv)
             }
             if (!strcmp("--inodes",argv[i])) {
               j = strlen(argv[i])-1;
-              inodeflag=TRUE;
+              inodeflag=true;
               break;
             }
             if (!strcmp("--device",argv[i])) {
               j = strlen(argv[i])-1;
-              devflag=TRUE;
+              devflag=true;
               break;
             }
             if (!strcmp("--noreport",argv[i])) {
               j = strlen(argv[i])-1;
-              noreport = TRUE;
+              noreport = true;
               break;
             }
             if (!strcmp("--nolinks",argv[i])) {
               j = strlen(argv[i])-1;
-              nolinks = TRUE;
+              nolinks = true;
               break;
             }
             if (!strcmp("--dirsfirst",argv[i])) {
               j = strlen(argv[i])-1;
-              dirsfirst = TRUE;
+              dirsfirst = true;
               break;
             }
             if (!strncmp("--filelimit",argv[i],11)) {
@@ -381,20 +381,20 @@ int main(int argc, char **argv)
             }
             if (!strncmp("--si", argv[i], 4)) {
               j = strlen(argv[i])-1;
-              sflag = TRUE;
-              hflag = TRUE;
-              siflag = TRUE;
+              sflag = true;
+              hflag = true;
+              siflag = true;
               break;
             }
             if (!strncmp("--du",argv[i],4)) {
               j = strlen(argv[i])-1;
-//     sflag = TRUE;
-              duflag = FALSE;
+//     sflag = true;
+              duflag = false;
               break;
             }
             if (!strncmp("--prune",argv[i],7)) {
               j = strlen(argv[i])-1;
-              pruneflag = TRUE;
+              pruneflag = true;
               break;
             }
             if (!strncmp("--timefmt",argv[i],9)) {
@@ -416,17 +416,17 @@ int main(int argc, char **argv)
                 fprintf(stderr,"tree: missing argument to --timefmt\n");
                 exit(1);
               }
-              Dflag = TRUE;
+              Dflag = true;
               break;
             }
             if (!strncmp("--ignore-case",argv[i],13)) {
               j = strlen(argv[i])-1;
-              ignorecase = TRUE;
+              ignorecase = true;
               break;
             }
             if (!strncmp("--matchdirs",argv[i],11)) {
               j = strlen(argv[i])-1;
-              matchdirs = TRUE;
+              matchdirs = true;
               break;
             }
             if (!strncmp("--sort",argv[i],6)) {
@@ -462,7 +462,7 @@ int main(int argc, char **argv)
             }
             if (!strncmp("--fromfile",argv[i],10)) {
               j = strlen(argv[i])-1;
-              fromfile=TRUE;
+              fromfile=true;
               break;
             }
             fprintf(stderr,"tree: Invalid argument `%s'.\n",argv[i]);
@@ -537,27 +537,27 @@ int main(int argc, char **argv)
   /* Set our listdir function and sanity check options. */
   if (Hflag) {
     listdir = needfulltree ? html_rlistdir : html_listdir;
-    Xflag = FALSE;
+    Xflag = false;
   } else if (Xflag) {
     listdir = needfulltree ? xml_rlistdir : xml_listdir;
-    colorize = FALSE;
-    colored = FALSE; /* Do people want colored XML output? */
+    colorize = false;
+    colored = false; /* Do people want colored XML output? */
   } else if (Jflag) {
     listdir = needfulltree ? json_rlistdir : json_listdir;
-    colorize = FALSE;
-    colored = FALSE; /* Do people want colored JSON output? */
+    colorize = false;
+    colored = false; /* Do people want colored JSON output? */
   } else {
     listdir = needfulltree ? unix_rlistdir : unix_listdir;
   }
-  if (dflag) pruneflag = FALSE; /* You'll just get nothing otherwise. */
+  if (dflag) pruneflag = false; /* You'll just get nothing otherwise. */
 
   if (Rflag && (Level == -1))
-    Rflag = FALSE;
+    Rflag = false;
 
   if (Hflag) {
     emit_html_header(charset, (char *) title, (char *) version);
 
-    fflag = FALSE;
+    fflag = false;
     if (nolinks) {
       if (force_color) fprintf(outfile, "<b class=\"NORM\">%s</b>",host);
       else fprintf(outfile,"%s",host);
@@ -583,7 +583,7 @@ int main(int argc, char **argv)
       }
       if ((n = lstat(dirname[i],&st)) >= 0) {
         saveino(st.st_ino, st.st_dev);
-        if (colorize) colored = color(st.st_mode,dirname[i],n<0,FALSE);
+        if (colorize) colored = color(st.st_mode,dirname[i],n<0,false);
         size += st.st_size;
       }
       if (Xflag || Jflag) {
@@ -614,7 +614,7 @@ int main(int argc, char **argv)
   } else {
     if ((n = lstat(".",&st)) >= 0) {
       saveino(st.st_ino, st.st_dev);
-      if (colorize) colored = color(st.st_mode,".",n<0,FALSE);
+      if (colorize) colored = color(st.st_mode,".",n<0,false);
       size = st.st_size;
     }
     if (Xflag) fprintf(outfile,"%s<directory name=\".\">",noindent?"":"  ");
@@ -815,7 +815,7 @@ struct _info **read_dir(char *dir, int *n)
     dl[p]->ldev = lst.st_dev;
     dl[p]->linode = lst.st_ino;
     dl[p]->lnk = NULL;
-    dl[p]->orphan = FALSE;
+    dl[p]->orphan = false;
     dl[p]->err = NULL;
     dl[p]->child = NULL;
 
@@ -831,13 +831,13 @@ struct _info **read_dir(char *dir, int *n)
       if (lst.st_size+1 > lbufsize) lbuf = xrealloc(lbuf,lbufsize=(lst.st_size+8192));
       if ((len=readlink(path,lbuf,lbufsize-1)) < 0) {
         dl[p]->lnk = scopy("[Error reading symbolic link information]");
-        dl[p]->isdir = FALSE;
+        dl[p]->isdir = false;
         dl[p++]->lnkmode = st.st_mode;
         continue;
       } else {
         lbuf[len] = 0;
         dl[p]->lnk = scopy(lbuf);
-        if (rs < 0) dl[p]->orphan = TRUE;
+        if (rs < 0) dl[p]->orphan = true;
         dl[p]->lnkmode = st.st_mode;
       }
     }

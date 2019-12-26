@@ -45,8 +45,8 @@ enum {
   DOT_EXTENSION, ERROR
 };
 
-bool colorize = FALSE, ansilines = FALSE, linktargetcolor = FALSE;
-char *term, termmatch = FALSE, istty;
+bool colorize = false, ansilines = false, linktargetcolor = false;
+char *term, termmatch = false, istty;
 char *leftcode = NULL, *rightcode = NULL, *endcode = NULL;
 
 char *norm_flgs = NULL, *file_flgs = NULL, *dir_flgs = NULL, *link_flgs = NULL;
@@ -81,23 +81,23 @@ void parse_dir_colors()
   if (Hflag) return;
 
   if (getenv("TERM") == NULL) {
-    colorize = FALSE;
+    colorize = false;
     return;
   }
 
   s = getenv("TREE_COLORS");
   if (s == NULL) s = getenv("LS_COLORS");
   cc = getenv("CLICOLOR");
-  if (getenv("CLICOLOR_FORCE") != NULL) force_color=TRUE;
+  if (getenv("CLICOLOR_FORCE") != NULL) force_color=true;
   if ((s == NULL || strlen(s) == 0) && (force_color || cc != NULL)) s = ":no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.bat=01;32:*.BAT=01;32:*.btm=01;32:*.BTM=01;32:*.cmd=01;32:*.CMD=01;32:*.com=01;32:*.COM=01;32:*.dll=01;32:*.DLL=01;32:*.exe=01;32:*.EXE=01;32:*.arj=01;31:*.bz2=01;31:*.deb=01;31:*.gz=01;31:*.lzh=01;31:*.rpm=01;31:*.tar=01;31:*.taz=01;31:*.tb2=01;31:*.tbz2=01;31:*.tbz=01;31:*.tgz=01;31:*.tz2=01;31:*.z=01;31:*.Z=01;31:*.zip=01;31:*.ZIP=01;31:*.zoo=01;31:*.asf=01;35:*.ASF=01;35:*.avi=01;35:*.AVI=01;35:*.bmp=01;35:*.BMP=01;35:*.flac=01;35:*.FLAC=01;35:*.gif=01;35:*.GIF=01;35:*.jpg=01;35:*.JPG=01;35:*.jpeg=01;35:*.JPEG=01;35:*.m2a=01;35:*.M2a=01;35:*.m2v=01;35:*.M2V=01;35:*.mov=01;35:*.MOV=01;35:*.mp3=01;35:*.MP3=01;35:*.mpeg=01;35:*.MPEG=01;35:*.mpg=01;35:*.MPG=01;35:*.ogg=01;35:*.OGG=01;35:*.ppm=01;35:*.rm=01;35:*.RM=01;35:*.tga=01;35:*.TGA=01;35:*.tif=01;35:*.TIF=01;35:*.wav=01;35:*.WAV=01;35:*.wmv=01;35:*.WMV=01;35:*.xbm=01;35:*.xpm=01;35:";
 
   if (s == NULL || (!force_color && (nocolor || !isatty(1)))) {
-    colorize = FALSE;
+    colorize = false;
     return;
   } else {
-    colorize = TRUE;
+    colorize = true;
     /* You can uncomment the below line and tree will always try to ANSI-fy the indentation lines */
-    /*    ansilines = TRUE; */
+    /*    ansilines = true; */
   }
 
   colors = scopy(s);
@@ -119,7 +119,7 @@ void parse_dir_colors()
       case COL_LINK:
         if (c[1]) {
           if (strcasecmp("target",c[1]) == 0) {
-            linktargetcolor = TRUE;
+            linktargetcolor = true;
             link_flgs = "01;36"; /* Should never actually be used */
           } else link_flgs = scopy(c[1]);
         }
@@ -197,7 +197,7 @@ void parse_dir_colors()
 
   free(colors);
 
-  /*  if (!termmatch) colorize = FALSE; */
+  /*  if (!termmatch) colorize = false; */
 }
 
 /*
@@ -250,75 +250,75 @@ int color(u_short mode, char *name, bool orphan, bool islink)
     if (islink) {
       if (missing_flgs) {
         fprintf(outfile,"%s%s%s",leftcode,missing_flgs,rightcode);
-        return TRUE;
+        return true;
       }
     } else {
       if (orphan_flgs) {
         fprintf(outfile,"%s%s%s",leftcode,orphan_flgs,rightcode);
-        return TRUE;
+        return true;
       }
     }
   }
   switch(mode & S_IFMT) {
     case S_IFIFO:
-      if (!fifo_flgs) return FALSE;
+      if (!fifo_flgs) return false;
       fprintf(outfile,"%s%s%s",leftcode,fifo_flgs,rightcode);
-      return TRUE;
+      return true;
     case S_IFCHR:
-      if (!char_flgs) return FALSE;
+      if (!char_flgs) return false;
       fprintf(outfile,"%s%s%s",leftcode,char_flgs,rightcode);
-      return TRUE;
+      return true;
     case S_IFDIR:
       if (mode & S_ISVTX) {
         if ((mode & S_IWOTH) && stickyow_flgs) {
           fprintf(outfile, "%s%s%s",leftcode,stickyow_flgs,rightcode);
-          return TRUE;
+          return true;
         }
         if (!(mode & S_IWOTH) && sticky_flgs) {
           fprintf(outfile, "%s%s%s",leftcode,sticky_flgs,rightcode);
-          return TRUE;
+          return true;
         }
       }
       if ((mode & S_IWOTH) && otherwr_flgs) {
         fprintf(outfile,"%s%s%s",leftcode,otherwr_flgs,rightcode);
-        return TRUE;
+        return true;
       }
-      if (!dir_flgs) return FALSE;
+      if (!dir_flgs) return false;
       fprintf(outfile,"%s%s%s",leftcode,dir_flgs,rightcode);
-      return TRUE;
+      return true;
 #ifndef __EMX__
     case S_IFBLK:
-      if (!block_flgs) return FALSE;
+      if (!block_flgs) return false;
       fprintf(outfile,"%s%s%s",leftcode,block_flgs,rightcode);
-      return TRUE;
+      return true;
     case S_IFLNK:
-      if (!link_flgs) return FALSE;
+      if (!link_flgs) return false;
       fprintf(outfile,"%s%s%s",leftcode,link_flgs,rightcode);
-      return TRUE;
+      return true;
   #ifdef S_IFDOOR
     case S_IFDOOR:
-      if (!door_flgs) return FALSE;
+      if (!door_flgs) return false;
       fprintf(outfile,"%s%s%s",leftcode,door_flgs,rightcode);
-      return TRUE;
+      return true;
   #endif
 #endif
     case S_IFSOCK:
-      if (!sock_flgs) return FALSE;
+      if (!sock_flgs) return false;
       fprintf(outfile,"%s%s%s",leftcode,sock_flgs,rightcode);
-      return TRUE;
+      return true;
     case S_IFREG:
       if ((mode & S_ISUID) && suid_flgs) {
         fprintf(outfile,"%s%s%s",leftcode,suid_flgs,rightcode);
-        return TRUE;
+        return true;
       }
       if ((mode & S_ISGID) && sgid_flgs) {
         fprintf(outfile,"%s%s%s",leftcode,sgid_flgs,rightcode);
-        return TRUE;
+        return true;
       }
-      if (!exec_flgs) return FALSE;
+      if (!exec_flgs) return false;
       if (mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
         fprintf(outfile,"%s%s%s",leftcode,exec_flgs,rightcode);
-        return TRUE;
+        return true;
       }
       /* not a directory, link, special device, etc, so check for extension match */
       l = strlen(name);
@@ -326,12 +326,12 @@ int color(u_short mode, char *name, bool orphan, bool islink)
         xl = strlen(e->ext);
         if (!strcmp((l>xl)?name+(l-xl):name,e->ext)) {
           fprintf(outfile,"%s%s%s",leftcode,e->term_flg,rightcode);
-          return TRUE;
+          return true;
         }
       }
-      return FALSE;
+      return false;
   }
-  return FALSE;
+  return false;
 }
 
 /*

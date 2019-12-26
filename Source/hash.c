@@ -110,6 +110,6 @@ int findino(ino_t inode, dev_t device)
     if (it->inode == inode && it->device >= device) break;
   }
 
-  if (it && it->inode == inode && it->device == device) return TRUE;
-  return FALSE;
+  if (it && it->inode == inode && it->device == device) return true;
+  return false;
 }

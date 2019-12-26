@@ -125,11 +125,11 @@ struct _info **fprune(struct _info *head, bool matched, bool root)
         if (ipattern && patmatch(ent->name, pattern) == 1) show = 0;
       }
       if (ent->isdir && show && matchdirs && pattern) {
-        if (patmatch(ent->name, pattern) == 1) matched = TRUE;
+        if (patmatch(ent->name, pattern) == 1) matched = true;
       }
     }
     if (pruneflag && !matched && ent->isdir && ent->tchild == NULL) show = 0;
-    if (show && ent->tchild != NULL) ent->child = fprune(ent->tchild, matched, FALSE);
+    if (show && ent->tchild != NULL) ent->child = fprune(ent->tchild, matched, false);
 
     t = ent;
     ent = ent->next;
@@ -201,14 +201,14 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
   if (fp != stdin) fclose(fp);
 
   // Prune accumulated directory tree:
-  return fprune(root, FALSE, TRUE);
+  return fprune(root, false, true);
 }
 
 // void f_listdir(struct _info *dir, char *d, int *dt, int *ft, u_long lev)
 // {
 //   char *path;
 //   long pathsize = 0;
-//   bool nlf = FALSE, colored = FALSE;
+//   bool nlf = false, colored = false;
 //
 //   if (dir == NULL) return;
 //
@@ -221,7 +221,7 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 //     if (!noindent) indent(lev);
 //
 //     if (colorize) {
-//       colored = color(dir->isdir? S_IFDIR : S_IFREG, dir->name, FALSE, FALSE);
+//       colored = color(dir->isdir? S_IFDIR : S_IFREG, dir->name, false, false);
 //     }
 //
 //     if (fflag) {
@@ -247,7 +247,7 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 //      else sprintf(path,"%s/%s",d,dir->name);
 //       }
 //       f_listdir(dir->child, fflag? path : NULL, dt, ft, lev+1);
-//       nlf = TRUE;
+//       nlf = true;
 //       *dt += 1;
 //     } else {
 //       if (dir->isdir) *dt += 1;
@@ -255,7 +255,7 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 //     }
 //
 //     if (dir->next && !dir->next->next) dirs[lev] = 2;
-//     if (nlf) nlf = FALSE;
+//     if (nlf) nlf = false;
 //     else fprintf(outfile,"\n");
 //     dir=dir->next;
 //   }

@@ -60,7 +60,7 @@ extern char *endcode;
 off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 {
   char *path;
-  bool nlf = FALSE;
+  bool nlf = false;
   unsigned
   long pathsize = 0;
   struct _info **dir, **sav;
@@ -151,7 +151,7 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
               else sprintf(path,"%s/%s",d,(*dir)->lnk);
               listdir(path,dt,ft,lev+1,dev);
             }
-            nlf = TRUE;
+            nlf = true;
           }
         }
       } else if (!(xdev && dev != (*dir)->dev)) {
@@ -160,13 +160,13 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
         else sprintf(path,"%s/%s",d,(*dir)->name);
         saveino((*dir)->inode, (*dir)->dev);
         listdir(path,dt,ft,lev+1,dev);
-        nlf = TRUE;
+        nlf = true;
       }
       *dt += 1;
     } else *ft += 1;
     if (*(dir+1) && !*(dir+2)) dirs[lev] = 2;
     if (nlf) {
-      nlf = FALSE;
+      nlf = false;
       if (!noindent) xml_indent(lev);
     }
     fprintf(outfile,"</%s>%s",ftype[t],noindent?"":"\n");
@@ -198,7 +198,7 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
   char *path;
   long pathsize = 0;
   struct _info **sav = dir;
-  bool nlf = FALSE;
+  bool nlf = false;
   int mt, t;
 
   if (dir == NULL) return;
@@ -256,7 +256,7 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
         else sprintf(path,"%s/%s",d,(*dir)->name);
       }
       xmlr_listdir((*dir)->child, fflag? path : NULL, dt, ft, lev+1);
-      nlf = TRUE;
+      nlf = true;
       *dt += 1;
     } else {
       if ((*dir)->isdir) *dt += 1;
@@ -265,7 +265,7 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
 
     if (*(dir+1) && !*(dir+2)) dirs[lev] = 2;
     if (nlf) {
-      nlf = FALSE;
+      nlf = false;
       if (!noindent) xml_indent(lev);
     }
     if (mt == S_IFDIR || mt == S_IFLNK || (*dir)->err != NULL) fprintf(outfile,"</%s>\n",ftype[t]);

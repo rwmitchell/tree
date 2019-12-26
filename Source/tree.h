@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include <time.h>
 #include <string.h>
 #include <strings.h>
@@ -61,14 +62,15 @@
 #endif
 
 /* Should probably use strdup(), but we like our xmalloc() */
-#define scopy(x)	strcpy(xmalloc(strlen(x)+1),(x))
-#define MINIT		30	/* number of dir entries to initially allocate */
-#define MINC		20	/* allocation increment */
+#define scopy(x)        strcpy(xmalloc(strlen(x)+1),(x))
+#define MINIT           30      /* number of dir entries to initially allocate */
+#define MINC            20      /* allocation increment */
 
-#ifndef TRUE
-typedef enum {FALSE=0, TRUE} bool;
+#if ( !defined  bool ) && ( !defined _Bool )
+  typedef enum {FALSE=0, TRUE} bool;
 #else
-typedef int bool;
+  enum { FALSE=false, TRUE=true };
+// typedef int bool;
 #endif
 
 struct _info {

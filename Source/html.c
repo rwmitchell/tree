@@ -72,7 +72,7 @@ void emit_html_header(const char *charset, char *title, char *version)
 off_t html_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 {
   char *path;
-  bool nlf = FALSE, colored = FALSE;
+  bool nlf = false, colored = false;
   long pathsize = 0;
   struct _info **dir, **sav;
   struct stat sb;
@@ -130,8 +130,8 @@ off_t html_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
     }
 
     if (colorize) {
-      if ((*dir)->lnk && linktargetcolor) colored = color((*dir)->lnkmode,(*dir)->name,(*dir)->orphan,FALSE);
-      else colored = color((*dir)->mode,(*dir)->name,(*dir)->orphan,FALSE);
+      if ((*dir)->lnk && linktargetcolor) colored = color((*dir)->lnkmode,(*dir)->name,(*dir)->orphan,false);
+      else colored = color((*dir)->mode,(*dir)->name,(*dir)->orphan,false);
     }
 
     if (fflag) {
@@ -226,7 +226,7 @@ off_t html_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
               else sprintf(path,"%s/%s",d,(*dir)->lnk);
               listdir(path,dt,ft,lev+1,dev);
             }
-            nlf = TRUE;
+            nlf = true;
           }
         }
       } else if (!(xdev && dev != (*dir)->dev)) {
@@ -235,12 +235,12 @@ off_t html_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
         else sprintf(path,"%s/%s",d,(*dir)->name);
         saveino((*dir)->inode, (*dir)->dev);
         listdir(path,dt,ft,lev+1,dev);
-        nlf = TRUE;
+        nlf = true;
       }
       *dt += 1;
     } else *ft += 1;
     if (*(dir+1) && !*(dir+2)) dirs[lev] = 2;
-    if (nlf) nlf = FALSE;
+    if (nlf) nlf = false;
     else fprintf(outfile,"<br>\n");
     dir++;
   }
@@ -269,7 +269,7 @@ void htmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
 {
   char *path;
   long pathsize = 0;
-  bool nlf = FALSE, colored = FALSE;
+  bool nlf = false, colored = false;
   struct _info **sav = dir;
   int i,c;
   char hclr[20], *hdir, *hcmd;
@@ -296,8 +296,8 @@ void htmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
     }
 
     if (colorize) {
-      if ((*dir)->lnk && linktargetcolor) colored = color((*dir)->lnkmode,(*dir)->name,(*dir)->orphan,FALSE);
-      else colored = color((*dir)->mode,(*dir)->name,(*dir)->orphan,FALSE);
+      if ((*dir)->lnk && linktargetcolor) colored = color((*dir)->lnkmode,(*dir)->name,(*dir)->orphan,false);
+      else colored = color((*dir)->mode,(*dir)->name,(*dir)->orphan,false);
     }
 
     if (fflag) {
@@ -382,7 +382,7 @@ void htmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
       if (!strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
       else sprintf(path,"%s/%s",d,(*dir)->name);
       htmlr_listdir((*dir)->child, path, dt, ft, lev+1);
-      nlf = TRUE;
+      nlf = true;
       *dt += 1;
     } else {
       if ((*dir)->isdir) *dt += 1;
@@ -390,7 +390,7 @@ void htmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
     }
 
     if (*(dir+1) && !*(dir+2)) dirs[lev] = 2;
-    if (nlf) nlf = FALSE;
+    if (nlf) nlf = false;
     else fprintf(outfile,"<br>\n");
     dir++;
   }
