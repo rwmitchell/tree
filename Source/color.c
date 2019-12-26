@@ -77,20 +77,20 @@ void parse_dir_colors()
   char buf[1025], **arg, **c, *colors, *s, *cc;
   int i, n;
   struct extensions *e;
-  
+
   if (Hflag) return;
-  
+
   if (getenv("TERM") == NULL) {
     colorize = FALSE;
     return;
   }
-  
+
   s = getenv("TREE_COLORS");
   if (s == NULL) s = getenv("LS_COLORS");
   cc = getenv("CLICOLOR");
   if (getenv("CLICOLOR_FORCE") != NULL) force_color=TRUE;
   if ((s == NULL || strlen(s) == 0) && (force_color || cc != NULL)) s = ":no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.bat=01;32:*.BAT=01;32:*.btm=01;32:*.BTM=01;32:*.cmd=01;32:*.CMD=01;32:*.com=01;32:*.COM=01;32:*.dll=01;32:*.DLL=01;32:*.exe=01;32:*.EXE=01;32:*.arj=01;31:*.bz2=01;31:*.deb=01;31:*.gz=01;31:*.lzh=01;31:*.rpm=01;31:*.tar=01;31:*.taz=01;31:*.tb2=01;31:*.tbz2=01;31:*.tbz=01;31:*.tgz=01;31:*.tz2=01;31:*.z=01;31:*.Z=01;31:*.zip=01;31:*.ZIP=01;31:*.zoo=01;31:*.asf=01;35:*.ASF=01;35:*.avi=01;35:*.AVI=01;35:*.bmp=01;35:*.BMP=01;35:*.flac=01;35:*.FLAC=01;35:*.gif=01;35:*.GIF=01;35:*.jpg=01;35:*.JPG=01;35:*.jpeg=01;35:*.JPEG=01;35:*.m2a=01;35:*.M2a=01;35:*.m2v=01;35:*.M2V=01;35:*.mov=01;35:*.MOV=01;35:*.mp3=01;35:*.MP3=01;35:*.mpeg=01;35:*.MPEG=01;35:*.mpg=01;35:*.MPG=01;35:*.ogg=01;35:*.OGG=01;35:*.ppm=01;35:*.rm=01;35:*.RM=01;35:*.tga=01;35:*.TGA=01;35:*.tif=01;35:*.TIF=01;35:*.wav=01;35:*.WAV=01;35:*.wmv=01;35:*.WMV=01;35:*.xbm=01;35:*.xpm=01;35:";
-  
+
   if (s == NULL || (!force_color && (nocolor || !isatty(1)))) {
     colorize = FALSE;
     return;
@@ -99,104 +99,104 @@ void parse_dir_colors()
     /* You can uncomment the below line and tree will always try to ANSI-fy the indentation lines */
     /*    ansilines = TRUE; */
   }
-  
+
   colors = scopy(s);
-  
+
   arg = split(colors,":",&n);
-  
+
   for(i=0;arg[i];i++) {
     c = split(arg[i],"=",&n);
     switch(cmd(c[0])) {
       case COL_NORMAL:
-	if (c[1]) norm_flgs = scopy(c[1]);
-	break;
+        if (c[1]) norm_flgs = scopy(c[1]);
+        break;
       case COL_FILE:
-	if (c[1]) file_flgs = scopy(c[1]);
-	break;
+        if (c[1]) file_flgs = scopy(c[1]);
+        break;
       case COL_DIR:
-	if (c[1]) dir_flgs = scopy(c[1]);
-	break;
+        if (c[1]) dir_flgs = scopy(c[1]);
+        break;
       case COL_LINK:
-	if (c[1]) {
-	  if (strcasecmp("target",c[1]) == 0) {
-	    linktargetcolor = TRUE;
-	    link_flgs = "01;36"; /* Should never actually be used */
-	  } else link_flgs = scopy(c[1]);
-	}
-	break;
+        if (c[1]) {
+          if (strcasecmp("target",c[1]) == 0) {
+            linktargetcolor = TRUE;
+            link_flgs = "01;36"; /* Should never actually be used */
+          } else link_flgs = scopy(c[1]);
+        }
+        break;
       case COL_FIFO:
-	if (c[1]) fifo_flgs = scopy(c[1]);
-	break;
+        if (c[1]) fifo_flgs = scopy(c[1]);
+        break;
       case COL_DOOR:
-	if (c[1]) door_flgs = scopy(c[1]);
-	break;
+        if (c[1]) door_flgs = scopy(c[1]);
+        break;
       case COL_BLK:
-	if (c[1]) block_flgs = scopy(c[1]);
-	break;
+        if (c[1]) block_flgs = scopy(c[1]);
+        break;
       case COL_CHR:
-	if (c[1]) char_flgs = scopy(c[1]);
-	break;
+        if (c[1]) char_flgs = scopy(c[1]);
+        break;
       case COL_ORPHAN:
-	if (c[1]) orphan_flgs = scopy(c[1]);
-	break;
+        if (c[1]) orphan_flgs = scopy(c[1]);
+        break;
       case COL_SOCK:
-	if (c[1]) sock_flgs = scopy(c[1]);
-	break;
+        if (c[1]) sock_flgs = scopy(c[1]);
+        break;
       case COL_SETUID:
-	if (c[1]) suid_flgs = scopy(c[1]);
-	break;
+        if (c[1]) suid_flgs = scopy(c[1]);
+        break;
       case COL_SETGID:
-	if (c[1]) sgid_flgs = scopy(c[1]);
-	break;
+        if (c[1]) sgid_flgs = scopy(c[1]);
+        break;
       case COL_STICKY_OTHER_WRITABLE:
-	if (c[1]) stickyow_flgs = scopy(c[1]);
-	break;
+        if (c[1]) stickyow_flgs = scopy(c[1]);
+        break;
       case COL_OTHER_WRITABLE:
-	if (c[1]) otherwr_flgs = scopy(c[1]);
-	break;
+        if (c[1]) otherwr_flgs = scopy(c[1]);
+        break;
       case COL_STICKY:
-	if (c[1]) sticky_flgs = scopy(c[1]);
-	break;
+        if (c[1]) sticky_flgs = scopy(c[1]);
+        break;
       case COL_EXEC:
-	if (c[1]) exec_flgs = scopy(c[1]);
-	break;
+        if (c[1]) exec_flgs = scopy(c[1]);
+        break;
       case COL_MISSING:
-	if (c[1]) missing_flgs = scopy(c[1]);
-	break;
+        if (c[1]) missing_flgs = scopy(c[1]);
+        break;
       case COL_LEFTCODE:
-	if (c[1]) leftcode = scopy(c[1]);
-	break;
+        if (c[1]) leftcode = scopy(c[1]);
+        break;
       case COL_RIGHTCODE:
-	if (c[1]) rightcode = scopy(c[1]);
-	break;
+        if (c[1]) rightcode = scopy(c[1]);
+        break;
       case COL_ENDCODE:
-	if (c[1]) endcode = scopy(c[1]);
-	break;
+        if (c[1]) endcode = scopy(c[1]);
+        break;
       case DOT_EXTENSION:
-	if (c[1]) {
-	  e = xmalloc(sizeof(struct extensions));
-	  e->ext = scopy(c[0]+1);
-	  e->term_flg = scopy(c[1]);
-	  e->nxt = ext;
-	  ext = e;
-	}
+        if (c[1]) {
+          e = xmalloc(sizeof(struct extensions));
+          e->ext = scopy(c[0]+1);
+          e->term_flg = scopy(c[1]);
+          e->nxt = ext;
+          ext = e;
+        }
     }
     free(c);
   }
   free(arg);
-  
+
   /* make sure at least norm_flgs is defined.  We're going to assume vt100 support */
   if (!leftcode) leftcode = scopy("\033[");
   if (!rightcode) rightcode = scopy("m");
   if (!norm_flgs) norm_flgs = scopy("00");
-  
+
   if (!endcode) {
     sprintf(buf,"%s%s%s",leftcode,norm_flgs,rightcode);
     endcode = scopy(buf);
   }
-  
+
   free(colors);
-  
+
   /*  if (!termmatch) colorize = FALSE; */
 }
 
@@ -208,14 +208,14 @@ char **split(char *str, char *delim, int *nwrds)
 {
   int n = 128;
   char **w = xmalloc(sizeof(char *) * n);
-  
+
   w[*nwrds = 0] = strtok(str,delim);
-  
+
   while (w[*nwrds]) {
     if (*nwrds == (n-2)) w = xrealloc(w,sizeof(char *) * (n+=256));
     w[++(*nwrds)] = strtok(NULL,delim);
   }
-  
+
   w[*nwrds] = NULL;
   return w;
 }
@@ -233,7 +233,7 @@ int cmd(char *s)
     {"ec", COL_ENDCODE}, {NULL, 0}
   };
   int i;
-  
+
   if (s[0] == '*') return DOT_EXTENSION;
   for(i=0;cmds[i].cmdnum;i++) {
     if (!strcmp(cmds[i].cmd,s)) return cmds[i].cmdnum;
@@ -249,13 +249,13 @@ int color(u_short mode, char *name, bool orphan, bool islink)
   if (orphan) {
     if (islink) {
       if (missing_flgs) {
-	fprintf(outfile,"%s%s%s",leftcode,missing_flgs,rightcode);
-	return TRUE;
+        fprintf(outfile,"%s%s%s",leftcode,missing_flgs,rightcode);
+        return TRUE;
       }
     } else {
       if (orphan_flgs) {
-	fprintf(outfile,"%s%s%s",leftcode,orphan_flgs,rightcode);
-	return TRUE;
+        fprintf(outfile,"%s%s%s",leftcode,orphan_flgs,rightcode);
+        return TRUE;
       }
     }
   }
@@ -270,18 +270,18 @@ int color(u_short mode, char *name, bool orphan, bool islink)
       return TRUE;
     case S_IFDIR:
       if (mode & S_ISVTX) {
-	if ((mode & S_IWOTH) && stickyow_flgs) {
- 	  fprintf(outfile, "%s%s%s",leftcode,stickyow_flgs,rightcode);
-	  return TRUE;
-	}
-	if (!(mode & S_IWOTH) && sticky_flgs) {
-	  fprintf(outfile, "%s%s%s",leftcode,sticky_flgs,rightcode);
-	  return TRUE;
-	}
+        if ((mode & S_IWOTH) && stickyow_flgs) {
+          fprintf(outfile, "%s%s%s",leftcode,stickyow_flgs,rightcode);
+          return TRUE;
+        }
+        if (!(mode & S_IWOTH) && sticky_flgs) {
+          fprintf(outfile, "%s%s%s",leftcode,sticky_flgs,rightcode);
+          return TRUE;
+        }
       }
       if ((mode & S_IWOTH) && otherwr_flgs) {
-	fprintf(outfile,"%s%s%s",leftcode,otherwr_flgs,rightcode);
-	return TRUE;
+        fprintf(outfile,"%s%s%s",leftcode,otherwr_flgs,rightcode);
+        return TRUE;
       }
       if (!dir_flgs) return FALSE;
       fprintf(outfile,"%s%s%s",leftcode,dir_flgs,rightcode);
@@ -308,26 +308,26 @@ int color(u_short mode, char *name, bool orphan, bool islink)
       return TRUE;
     case S_IFREG:
       if ((mode & S_ISUID) && suid_flgs) {
-	fprintf(outfile,"%s%s%s",leftcode,suid_flgs,rightcode);
-	return TRUE;
+        fprintf(outfile,"%s%s%s",leftcode,suid_flgs,rightcode);
+        return TRUE;
       }
       if ((mode & S_ISGID) && sgid_flgs) {
-	fprintf(outfile,"%s%s%s",leftcode,sgid_flgs,rightcode);
-	return TRUE;
+        fprintf(outfile,"%s%s%s",leftcode,sgid_flgs,rightcode);
+        return TRUE;
       }
       if (!exec_flgs) return FALSE;
       if (mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-	fprintf(outfile,"%s%s%s",leftcode,exec_flgs,rightcode);
-	return TRUE;
+        fprintf(outfile,"%s%s%s",leftcode,exec_flgs,rightcode);
+        return TRUE;
       }
       /* not a directory, link, special device, etc, so check for extension match */
       l = strlen(name);
       for(e=ext;e;e=e->nxt) {
-	xl = strlen(e->ext);
-	if (!strcmp((l>xl)?name+(l-xl):name,e->ext)) {
-	  fprintf(outfile,"%s%s%s",leftcode,e->term_flg,rightcode);
-	  return TRUE;
-	}
+        xl = strlen(e->ext);
+        if (!strcmp((l>xl)?name+(l-xl):name,e->ext)) {
+          fprintf(outfile,"%s%s%s",leftcode,e->term_flg,rightcode);
+          return TRUE;
+        }
       }
       return FALSE;
   }
@@ -347,59 +347,59 @@ const char *getcharset(void)
   char*charset=getenv("TREE_CHARSET");
   if(charset)
     return charset;
-  
+
   if(!getenv("WINDOWID"))
     if(!DosQueryCp(sizeof aulCpList,aulCpList,&ulListSize))
       if(ulListSize>=sizeof*aulCpList)
-	codepage=*aulCpList;
-      
+        codepage=*aulCpList;
+
       switch(codepage){
-	case 437: case 775: case 850: case 851: case 852: case 855:
-	case 857: case 860: case 861: case 862: case 863: case 864:
-	case 865: case 866: case 868: case 869: case 891: case 903:
-	case 904:
-	  sprintf(buffer,"IBM%03lu",codepage);
-	  break;
-	case 367:
-	  return"US-ASCII";
-	case 813:
-	  return"ISO-8859-7";
-	case 819:
-	  return"ISO-8859-1";
-	case 881: case 882: case 883: case 884: case 885:
-	  sprintf(buffer,"ISO-8859-%lu",codepage-880);
-	  break;
-	case  858: case  924:
-	  sprintf(buffer,"IBM%05lu",codepage);
-	  break;
-	case 874:
-	  return"TIS-620";
-	case 897: case 932: case 942: case 943:
-	  return"Shift_JIS";
-	case 912:
-	  return"ISO-8859-2";
-	case 915:
-	  return"ISO-8859-5";
-	case 916:
-	  return"ISO-8859-8";
-	case 949: case 970:
-	  return"EUC-KR";
-	case 950:
-	  return"Big5";
-	case 954:
-	  return"EUC-JP";
-	case 1051:
-	  return"hp-roman8";
-	case 1089:
-	  return"ISO-8859-6";
-	case 1250: case 1251: case 1253: case 1254: case 1255: case 1256:
-	case 1257: case 1258:
-	  sprintf(buffer,"windows-%lu",codepage);
-	  break;
-	case 1252:
-	  return"ISO-8859-1-Windows-3.1-Latin-1";
-	default:
-	  return NULL;
+        case 437: case 775: case 850: case 851: case 852: case 855:
+        case 857: case 860: case 861: case 862: case 863: case 864:
+        case 865: case 866: case 868: case 869: case 891: case 903:
+        case 904:
+          sprintf(buffer,"IBM%03lu",codepage);
+          break;
+        case 367:
+          return"US-ASCII";
+        case 813:
+          return"ISO-8859-7";
+        case 819:
+          return"ISO-8859-1";
+        case 881: case 882: case 883: case 884: case 885:
+          sprintf(buffer,"ISO-8859-%lu",codepage-880);
+          break;
+        case  858: case  924:
+          sprintf(buffer,"IBM%05lu",codepage);
+          break;
+        case 874:
+          return"TIS-620";
+        case 897: case 932: case 942: case 943:
+          return"Shift_JIS";
+        case 912:
+          return"ISO-8859-2";
+        case 915:
+          return"ISO-8859-5";
+        case 916:
+          return"ISO-8859-8";
+        case 949: case 970:
+          return"EUC-KR";
+        case 950:
+          return"Big5";
+        case 954:
+          return"EUC-JP";
+        case 1051:
+          return"hp-roman8";
+        case 1089:
+          return"ISO-8859-6";
+        case 1250: case 1251: case 1253: case 1254: case 1255: case 1256:
+        case 1257: case 1258:
+          sprintf(buffer,"windows-%lu",codepage);
+          break;
+        case 1252:
+          return"ISO-8859-1-Windows-3.1-Latin-1";
+        default:
+          return NULL;
       }
       #endif
 }
@@ -485,12 +485,12 @@ void initlinedraw(int flag)
     { NULL,        "|  ",              "|--",            "`--",            "(c)"      }
   };
   const char**s;
-    
+
   if (flag) {
     fprintf(stderr,"tree: missing argument to --charset, valid charsets include:\n");
     for(linedraw=cstable;linedraw->name;++linedraw) {
       for(s=linedraw->name;*s;++s) {
-	fprintf(stderr,"  %s\n",*s);
+        fprintf(stderr,"  %s\n",*s);
       }
     }
     return;
@@ -498,7 +498,7 @@ void initlinedraw(int flag)
   if (charset) {
     for(linedraw=cstable;linedraw->name;++linedraw)
       for(s=linedraw->name;*s;++s)
-	if(!strcasecmp(charset,*s)) return;
+        if(!strcasecmp(charset,*s)) return;
   }
   linedraw=cstable+sizeof cstable/sizeof*cstable-1;
 }

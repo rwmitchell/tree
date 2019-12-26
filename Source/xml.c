@@ -114,12 +114,12 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 
     if (fflag) {
       if (sizeof(char) * (strlen(d)+strlen((*dir)->name)+2) > pathsize)
-	path=xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen((*dir)->name)+1024)));
+        path=xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen((*dir)->name)+1024)));
       if (!strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
       else sprintf(path,"%s/%s",d,(*dir)->name);
     } else {
       if (sizeof(char) * (strlen((*dir)->name)+1) > pathsize)
-	path=xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
+        path=xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
       sprintf(path,"%s",(*dir)->name);
     }
 
@@ -137,29 +137,29 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 
     if ((*dir)->isdir) {
       if ((*dir)->lnk) {
-	if (lflag && !(xdev && dev != (*dir)->dev)) {
-	  if (findino((*dir)->inode,(*dir)->dev)) {
-	    fprintf(outfile,"<error>recursive, not followed</error>");
-	  } else {
-	    saveino((*dir)->inode, (*dir)->dev);
-	    if (*(*dir)->lnk == '/')
-	      listdir((*dir)->lnk,dt,ft,lev+1,dev);
-	    else {
-	      if (strlen(d)+strlen((*dir)->lnk)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
-	      if (fflag && !strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->lnk);
-	      else sprintf(path,"%s/%s",d,(*dir)->lnk);
-	      listdir(path,dt,ft,lev+1,dev);
-	    }
-	    nlf = TRUE;
-	  }
-	}
+        if (lflag && !(xdev && dev != (*dir)->dev)) {
+          if (findino((*dir)->inode,(*dir)->dev)) {
+            fprintf(outfile,"<error>recursive, not followed</error>");
+          } else {
+            saveino((*dir)->inode, (*dir)->dev);
+            if (*(*dir)->lnk == '/')
+              listdir((*dir)->lnk,dt,ft,lev+1,dev);
+            else {
+              if (strlen(d)+strlen((*dir)->lnk)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
+              if (fflag && !strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->lnk);
+              else sprintf(path,"%s/%s",d,(*dir)->lnk);
+              listdir(path,dt,ft,lev+1,dev);
+            }
+            nlf = TRUE;
+          }
+        }
       } else if (!(xdev && dev != (*dir)->dev)) {
-	if (strlen(d)+strlen((*dir)->name)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
-	if (fflag && !strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
-	else sprintf(path,"%s/%s",d,(*dir)->name);
-	saveino((*dir)->inode, (*dir)->dev);
-	listdir(path,dt,ft,lev+1,dev);
-	nlf = TRUE;
+        if (strlen(d)+strlen((*dir)->name)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
+        if (fflag && !strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
+        else sprintf(path,"%s/%s",d,(*dir)->name);
+        saveino((*dir)->inode, (*dir)->dev);
+        listdir(path,dt,ft,lev+1,dev);
+        nlf = TRUE;
       }
       *dt += 1;
     } else *ft += 1;
@@ -182,13 +182,13 @@ off_t xml_rlistdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
   struct _info **dir;
   off_t size = 0;
   char *err;
-  
+
   dir = getfulltree(d, lev, dev, &size, &err);
-  
+
   memset(dirs, 0, sizeof(int) * maxdirs);
-  
+
   xmlr_listdir(dir, d, dt, ft, lev);
-  
+
   return size;
 }
 
@@ -199,15 +199,15 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
   struct _info **sav = dir;
   bool nlf = FALSE;
   int mt, t;
-  
+
   if (dir == NULL) return;
-  
+
   dirs[lev] = 1;
   if (!*(dir+1)) dirs[lev] = 2;
   fprintf(outfile,"\n");
-  
+
   path = malloc(pathsize=4096);
-  
+
   while(*dir) {
     if (!noindent) xml_indent(lev);
 
@@ -219,12 +219,12 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
 
     if (fflag) {
       if (sizeof(char) * (strlen(d)+strlen((*dir)->name)+2) > pathsize)
-	path=xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen((*dir)->name)+1024)));
+        path=xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen((*dir)->name)+1024)));
       if (!strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
       else sprintf(path,"%s/%s",d,(*dir)->name);
     } else {
       if (sizeof(char) * (strlen((*dir)->name)+1) > pathsize)
-	path=xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
+        path=xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
       sprintf(path,"%s",(*dir)->name);
     }
 
@@ -249,9 +249,9 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
     }
     if ((*dir)->child) {
       if (fflag) {
-	if (strlen(d)+strlen((*dir)->name)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
-	if (!strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
-	else sprintf(path,"%s/%s",d,(*dir)->name);
+        if (strlen(d)+strlen((*dir)->name)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen((*dir)->name)+1024));
+        if (!strcmp(d,"/")) sprintf(path,"%s%s",d,(*dir)->name);
+        else sprintf(path,"%s/%s",d,(*dir)->name);
       }
       xmlr_listdir((*dir)->child, fflag? path : NULL, dt, ft, lev+1);
       nlf = TRUE;
@@ -260,7 +260,7 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
       if ((*dir)->isdir) *dt += 1;
       else *ft += 1;
     }
-    
+
     if (*(dir+1) && !*(dir+2)) dirs[lev] = 2;
     if (nlf) {
       nlf = FALSE;
@@ -278,7 +278,7 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
 void xml_indent(int maxlevel)
 {
   int i;
-  
+
   fprintf(outfile, "    ");
   for(i=0; i<maxlevel; i++)
     fprintf(outfile, "  ");

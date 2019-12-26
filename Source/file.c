@@ -39,7 +39,7 @@ char *nextpc(char **p, int *tok)
   static char prev = 0;
   char *s = *p;
   if (!**p) {
-    *tok = T_EOP;	// Shouldn't happen.
+    *tok = T_EOP;       // Shouldn't happen.
     return NULL;
   }
   if (prev) {
@@ -121,11 +121,11 @@ struct _info **fprune(struct _info *head, bool matched, bool root)
     if (!aflag && !root && ent->name[0] == '.') show = 0;
     if (show && !matched) {
       if (!ent->isdir) {
-	if (pattern && patmatch(ent->name, pattern) == 0) show = 0;
-	if (ipattern && patmatch(ent->name, pattern) == 1) show = 0;
+        if (pattern && patmatch(ent->name, pattern) == 0) show = 0;
+        if (ipattern && patmatch(ent->name, pattern) == 1) show = 0;
       }
       if (ent->isdir && show && matchdirs && pattern) {
-	if (patmatch(ent->name, pattern) == 1) matched = TRUE;
+        if (patmatch(ent->name, pattern) == 1) matched = TRUE;
       }
     }
     if (pruneflag && !matched && ent->isdir && ent->tchild == NULL) show = 0;
@@ -181,20 +181,20 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
       s = nextpc(&spath, &tok);
       if (tok == T_PATHSEP) continue;
       switch(tok) {
-	case T_PATHSEP: continue;
-	case T_FILE:
-	case T_DIR:
-	  // Should probably handle '.' and '..' entries here
-	  ent = search(cwd, s);
-	  // Might be empty, but should definitely be considered a directory:
-	  if (tok == T_DIR) {
-	    ent->isdir = 1;
-	    ent->mode = S_IFDIR;
-	  } else {
-	    ent->mode = S_IFREG;
-	  }
-	  cwd = &(ent->tchild);
-	  break;
+        case T_PATHSEP: continue;
+        case T_FILE:
+        case T_DIR:
+          // Should probably handle '.' and '..' entries here
+          ent = search(cwd, s);
+          // Might be empty, but should definitely be considered a directory:
+          if (tok == T_DIR) {
+            ent->isdir = 1;
+            ent->mode = S_IFDIR;
+          } else {
+            ent->mode = S_IFREG;
+          }
+          cwd = &(ent->tchild);
+          break;
       }
     } while (tok != T_FILE && tok != T_EOP);
   }
@@ -209,42 +209,42 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 //   char *path;
 //   long pathsize = 0;
 //   bool nlf = FALSE, colored = FALSE;
-// 
+//
 //   if (dir == NULL) return;
-// 
+//
 //   dirs[lev] = (dir->next? 1 : 2);
 //   fprintf(outfile,"\n");
-// 
+//
 //   path = malloc(pathsize=4096);
-// 
+//
 //   while(dir) {
 //     if (!noindent) indent(lev);
-// 
+//
 //     if (colorize) {
 //       colored = color(dir->isdir? S_IFDIR : S_IFREG, dir->name, FALSE, FALSE);
 //     }
-// 
+//
 //     if (fflag) {
 //       if (sizeof(char) * (strlen(d)+strlen(dir->name)+2) > pathsize)
-// 	path=xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen(dir->name)+1024)));
+//      path=xrealloc(path,pathsize=(sizeof(char) * (strlen(d)+strlen(dir->name)+1024)));
 //       if (!strcmp(d,"/")) sprintf(path,"%s%s",d,dir->name);
 //       else sprintf(path,"%s/%s",d,dir->name);
 //     } else {
 //       if (sizeof(char) * (strlen(dir->name)+1) > pathsize)
-// 	path=xrealloc(path,pathsize=(sizeof(char) * (strlen(dir->name)+1024)));
+//      path=xrealloc(path,pathsize=(sizeof(char) * (strlen(dir->name)+1024)));
 //       sprintf(path,"%s",dir->name);
 //     }
-//     
+//
 //     printit(path);
-//     
+//
 //     if (colored) fprintf(outfile,"%s",endcode);
 //     if (Fflag && dir->isdir) fputc(Ftype(S_IFDIR), outfile);
-//     
+//
 //     if (dir->child) {
 //       if (fflag) {
-// 	if (strlen(d)+strlen(dir->name)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen(dir->name)+1024));
-// 	if (!strcmp(d,"/")) sprintf(path,"%s%s",d,dir->name);
-// 	else sprintf(path,"%s/%s",d,dir->name);
+//      if (strlen(d)+strlen(dir->name)+2 > pathsize) path=xrealloc(path,pathsize=(strlen(d)+strlen(dir->name)+1024));
+//      if (!strcmp(d,"/")) sprintf(path,"%s%s",d,dir->name);
+//      else sprintf(path,"%s/%s",d,dir->name);
 //       }
 //       f_listdir(dir->child, fflag? path : NULL, dt, ft, lev+1);
 //       nlf = TRUE;
@@ -253,7 +253,7 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 //       if (dir->isdir) *dt += 1;
 //       else *ft += 1;
 //     }
-// 
+//
 //     if (dir->next && !dir->next->next) dirs[lev] = 2;
 //     if (nlf) nlf = FALSE;
 //     else fprintf(outfile,"\n");
@@ -267,18 +267,18 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 // {
 //   FILE *fp = (d != NULL? fopen(d,"r") : stdin);
 //   struct _info *root;
-//   
+//
 //   if (fp == NULL) {
 //     fprintf(stderr,"Error opening %s for reading.\n", d);
 //     return;
 //   }
 //   root = getfulltree(fp, lev);
 //   if (d != NULL) fclose(fp);
-// 
+//
 //   memset(dirs, 0, sizeof(int) * maxdirs);
-// 
+//
 //   f_listdir(root, "/", dt, ft, lev);
-// 
+//
 //   freefiletree(root);
 //   return;
 // }
