@@ -60,6 +60,7 @@ unsigned long AGE_secs[32];  // 32 date colors
 time_t The_Time; // = time( NULL );
 off_t dusize = 0;
 const char *TF[] = { "False", "True" };
+bool showsym = false;
 
 #ifdef __EMX__
 const u_short ifmt[]={ FILE_ARCHIVED, FILE_DIRECTORY, FILE_SYSTEM, FILE_HIDDEN, FILE_READONLY, 0};
@@ -395,6 +396,11 @@ int main(int argc, char **argv)
             if (!strncmp("--prune",argv[i],7)) {
               j = strlen(argv[i])-1;
               pruneflag = true;
+              break;
+            }
+            if (!strncmp("--sym", argv[i],5)) {
+              j = strlen(argv[i])-1;
+              showsym = true;
               break;
             }
             if (!strncmp("--timefmt",argv[i],9)) {
@@ -741,6 +747,7 @@ void usage(int n)
         "  --fromfile    Reads paths from files (.=stdin)\n"
         "  ------- Miscellaneous options -------\n"
         "  --du          Disable 'du' sizes for directories\n"
+        "  --sym         Show symlink destination\n"
         "  --version     Print version and exit.\n"
         "  --help        Print usage and this help message and exit.\n"
         "  --            Options processing terminator.\n");

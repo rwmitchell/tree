@@ -28,7 +28,8 @@ extern int (*cmpfunc)();
 extern FILE *outfile;
 extern int Level, *dirs, maxdirs;
 
-extern bool colorize, linktargetcolor;
+extern bool colorize, linktargetcolor,
+            showsym;
 extern char *endcode;
 
 off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
@@ -110,7 +111,7 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
       if ((c = Ftype((*dir)->mode))) fputc(c, outfile);
     }
 
-    if ((*dir)->lnk) {
+    if ((*dir)->lnk && showsym ) {
       fprintf(outfile," -> ");
       if (colorize) colored = color((*dir)->lnkmode,(*dir)->lnk,(*dir)->orphan,true);
       printit((*dir)->lnk);
@@ -225,7 +226,7 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
       if ((c = Ftype((*dir)->mode))) fputc(c, outfile);
     }
 
-    if ((*dir)->lnk) {
+    if ((*dir)->lnk && showsym ) {
       fprintf(outfile," -> ");
       if (colorize) colored = color((*dir)->lnkmode,(*dir)->lnk,(*dir)->orphan,true);
       printit((*dir)->lnk);
