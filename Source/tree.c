@@ -59,7 +59,8 @@ int   AGE_ftcnt = 0;
 unsigned long AGE_secs[32];  // 32 date colors
 time_t The_Time; // = time( NULL );
 off_t dusize = 0;
-const char *TF[] = { "False", "True" };
+const char *TF[] = { "False", "True" },
+           *firstdir = ".";
 bool showsym = false;
 
 #ifdef __EMX__
@@ -545,7 +546,9 @@ int main(int argc, char **argv) {
   } else if (Jflag)
     fputc('[',outfile);
 
+//fprintf( outfile, "Tree: " );         // RWM: only output for plain text
   if (dirname) {
+    firstdir = dirname[0];
     for(colored=i=0;dirname[i];i++,colored=0) {
       if (fflag) {
         do {
@@ -568,7 +571,7 @@ int main(int argc, char **argv) {
           if (i) fprintf(outfile, ",");
           fprintf(outfile,"%s{\"type\":\"%s\",\"name\":\"%s\",\"contents\":[", noindent?"":"\n  ", ftype[j], dirname[i]);
         }
-      } else if (!Hflag) printit(dirname[i]);
+      } else if (!Hflag) printit(dirname[i]);             // XYZZY - output starting directory
       if (colored) fprintf(outfile,"%s",endcode);
       if (!Hflag) size += listdir(dirname[i],&dtotal,&ftotal,0,0);
       else {

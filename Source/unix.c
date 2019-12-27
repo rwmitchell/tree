@@ -31,6 +31,7 @@ extern int Level, *dirs, maxdirs;
 extern bool colorize, linktargetcolor,
             showsym;
 extern char *endcode;
+extern char *firstdir;  // RWM
 
 off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 {
@@ -80,7 +81,13 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 
   while(*dir) {
 
-    fillinfo(path,*dir);                 // rwm - XYZZY mark
+    fillinfo(path,*dir);
+    if ( firstdir ) {
+      if (colorize) colored = color( S_IFDIR, firstdir, false, false);
+      fprintf(outfile, "%*s%s - MARK\n", cnt_printable( path )+3, " ", firstdir );
+      if (colored) fprintf(outfile,"%s",endcode);
+      firstdir = NULL;
+    }
     if (path[0] == ' ') {
       path[0] = '[';
       fprintf(outfile, "%s]  ",path);
@@ -195,7 +202,13 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
 
   while(*dir) {
 
-    fillinfo(path,*dir);
+    fillinfo(path,*dir);                 // rwm - XYZZY mark
+    if ( firstdir ) {
+      if (colorize) colored = color( S_IFDIR, firstdir, false, false);
+      fprintf(outfile, "%*s%s\n", cnt_printable( path )+3, " ", firstdir );
+      if (colored) fprintf(outfile,"%s",endcode);
+      firstdir = NULL;
+    }
     if (path[0] == ' ') {
       path[0] = '[';
       fprintf(outfile, "%s]  ",path);

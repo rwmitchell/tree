@@ -222,6 +222,26 @@ int age_env2ft( char *env, char sep, unsigned long *age, char **col ) {  // RWM
   }
   return( cnt );
 }
+
+int cnt_printable(char *str ) {            // RWM
+  int cnt   = 0,
+      state = 0;
+  char *pc;
+
+  for ( pc = str; *pc; ++pc ) {
+    if ( *pc == 033 ) {                    // Escape sequence YAY
+        state = 1;
+    } else if (state == 1) {
+        if (('a' <= *pc && *pc <= 'z') || ('A' <= *pc && *pc <= 'Z'))
+            state = 2;
+    } else {
+        state = 0;
+        cnt++;
+    }
+  }
+
+  return( cnt);
+}
 int cmd(char *s) {
   static struct {
     char *cmd;
