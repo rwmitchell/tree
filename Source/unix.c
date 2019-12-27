@@ -83,8 +83,10 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 
     fillinfo(path,*dir);
     if ( firstdir ) {
+      int n = cnt_printable( path );
+      n += n>0 ? 3 : 0;     // add 3 if n is > 0
       if (colorize) colored = color( S_IFDIR, firstdir, false, false);
-      fprintf(outfile, "%*s%s - MARK\n", cnt_printable( path )+3, " ", firstdir );
+      fprintf(outfile, "%*s%s - MARK\n", n, n ? " " : "", firstdir );
       if (colored) fprintf(outfile,"%s",endcode);
       firstdir = NULL;
     }
@@ -204,8 +206,10 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
 
     fillinfo(path,*dir);                 // rwm - XYZZY mark
     if ( firstdir ) {
+      int n = cnt_printable( path );
+      n += n>0 ? 3 : 0;     // add 3 if n is > 0
       if (colorize) colored = color( S_IFDIR, firstdir, false, false);
-      fprintf(outfile, "%*s%s\n", cnt_printable( path )+3, " ", firstdir );
+      fprintf(outfile, "%*s%s\n", n, n ? " " : "", firstdir );
       if (colored) fprintf(outfile,"%s",endcode);
       firstdir = NULL;
     }
