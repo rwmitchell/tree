@@ -473,7 +473,7 @@ int main(int argc, char **argv) {
   }
   if (p) dirname[p] = NULL;
 
-  if ( !nocolor ) parse_env_colors();
+  if ( !nocolor && !Hflag && !Jflag && ! Xflag ) parse_env_colors();
   The_Time = time( NULL );
 
   if (outfilename == NULL) {
