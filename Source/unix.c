@@ -33,6 +33,24 @@ extern bool colorize, linktargetcolor,
 extern char *endcode;
 extern char *firstdir;  // RWM
 
+char *get_dirname( const char *name ) {
+  int rc;
+  char *oname,
+       *nname;
+
+  oname = (char *) malloc( MAXNAMLEN );
+  nname = (char *) malloc( MAXNAMLEN );
+
+  if ( !oname || !nname ) { fprintf(stderr, "get_dirname(%s): failed to allocate space\n", name); exit(0); }
+  getcwd( oname, MAXNAMLEN );
+  rc = chdir( name );
+  if ( rc < 0 ) { fprintf( stderr, "get_dirname(%s): chdir failed\n", name ); }
+  getcwd( nname, MAXNAMLEN );
+  chdir( oname );   // return to starting point
+
+  return( nname );
+}
+
 off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
 {
   char *path;
@@ -86,8 +104,10 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
       int n = cnt_printable( path );
       n += n>0 ? 3 : 0;     // add 3 if n is > 0
       if (colorize) colored = color( S_IFDIR, firstdir, false, false);
+      firstdir = get_dirname( firstdir );
       fprintf(outfile, "%*s%s - MARK\n", n, n ? " " : "", firstdir );
       if (colored) fprintf(outfile,"%s",endcode);
+      free( firstdir );
       firstdir = NULL;
     }
     if (path[0] == ' ') {
@@ -209,8 +229,10 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
       int n = cnt_printable( path );
       n += n>0 ? 3 : 0;     // add 3 if n is > 0
       if (colorize) colored = color( S_IFDIR, firstdir, false, false);
+      firstdir = get_dirname( firstdir );
       fprintf(outfile, "%*s%s\n", n, n ? " " : "", firstdir );
       if (colored) fprintf(outfile,"%s",endcode);
+      free( firstdir );
       firstdir = NULL;
     }
     if (path[0] == ' ') {
