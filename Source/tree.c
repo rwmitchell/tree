@@ -145,143 +145,79 @@ int main(int argc, char **argv) {
     if (optf && argv[i][0] == '-' && argv[i][1]) {
       for(j=1;argv[i][j];j++) {
         switch(argv[i][j]) {
-        case 'N':
-          Nflag = true;
-          break;
-        case 'q':
-          qflag = true;
-          break;
-        case 'Q':
-          Qflag = true;
-          break;
-        case 'd':
-          dflag = true;
-          break;
-        case 'l':
-          lflag = true;
-          break;
-        case 's':
-          sflag = true;
-          break;
-        case 'h':
-          hflag = true;
-          sflag = true; /* Assume they also want -s */
-          break;
-        case 'u':
-          uflag = true;
-          break;
-        case 'g':
-          gflag = true;
-          break;
-        case 'f':
-          fflag = true;
-          break;
-        case 'F':
-          Fflag = true;
-          break;
-        case 'a':
-          aflag = true;
-          break;
-        case 'p':
-          pflag = true;
-          break;
-        case 'i':
-          noindent = true;
-          _nl = "";
-          break;
-        case 'C':
-          force_color = true;
-          break;
-        case 'n':
-          nocolor = true;
-          break;
-        case 'x':
-          xdev = true;
-          break;
-        case 'P':
-          if (argv[n] == NULL) {
-            fprintf(stderr,"tree: missing argument to -P option.\n");
-            exit(1);
-          }
-          pattern = argv[n++];
-          break;
-        case 'I':
-          if (argv[n] == NULL) {
-            fprintf(stderr,"tree: missing argument to -I option.\n");
-            exit(1);
-          }
-          ipattern = argv[n++];
-          break;
-        case 'A':
-          ansilines = true;
-          break;
-        case 'S':
-          charset = "IBM437";
-          break;
-        case 'D':
-          Dflag = true;
-          break;
-        case 't':
-          cmpfunc = mtimesort;
-          break;
-        case 'c':
-          cmpfunc = ctimesort;
-          cflag = true;
-          break;
-        case 'r':
-          reverse = true;
-          break;
-        case 'v':
-          cmpfunc = versort;
-          break;
-        case 'U':
-          cmpfunc = NULL;
-          break;
-        case 'X':
-          Hflag = false;
-          Xflag = true;
-          break;
-        case 'J':
-          Jflag = true;
-          break;
-        case 'H':
-          Hflag = true;
-          Xflag = false;
-          if (argv[n] == NULL) {
-            fprintf(stderr,"tree: missing argument to -H option.\n");
-            exit(1);
-          }
-          host = argv[n++];
-          sp = "&nbsp;";
-          break;
-        case 'T':
-          if (argv[n] == NULL) {
-            fprintf(stderr,"tree: missing argument to -T option.\n");
-            exit(1);
-          }
-          title = argv[n++];
-          break;
-        case 'R':
-          Rflag = true;
-          break;
-        case 'L':
-          if ((sLevel = argv[n++]) == NULL) {
-            fprintf(stderr,"tree: Missing argument to -L option.\n");
-            exit(1);
-          }
-          Level = strtoul(sLevel,NULL,0)-1;
-          if (Level < 0) {
-            fprintf(stderr,"tree: Invalid level, must be greater than 0.\n");
-            exit(1);
-          }
-          break;
-        case 'o':
-          if (argv[n] == NULL) {
-            fprintf(stderr,"tree: missing argument to -o option.\n");
-            exit(1);
-          }
-          outfilename = argv[n++];
-          break;
+        case 'N': Nflag = true; break;
+        case 'q': qflag = true; break;
+        case 'Q': Qflag = true; break;
+        case 'd': dflag = true; break;
+        case 'l': lflag = true; break;
+        case 's': sflag = true; break;
+        case 'h': hflag = true;
+                  sflag = true; break;  /* Assume they also want -s */
+        case 'u': uflag = true; break;
+        case 'g': gflag = true; break;
+        case 'f': fflag = true; break;
+        case 'F': Fflag = true; break;
+        case 'a': aflag = true; break;
+        case 'p': pflag = true; break;
+        case 'i': noindent    = true;
+                  _nl         = "";   break;
+        case 'C': force_color = true; break;
+        case 'n': nocolor     = true; break;
+        case 'x': xdev        = true; break;
+        case 'P': if (argv[n] == NULL) {
+                    fprintf(stderr,"tree: missing argument to -P option.\n");
+                    exit(1);
+                  }
+                  pattern = argv[n++];
+                  break;
+        case 'I': if (argv[n] == NULL) {
+                    fprintf(stderr,"tree: missing argument to -I option.\n");
+                    exit(1);
+                  }
+                  ipattern = argv[n++];
+                  break;
+        case 'A': ansilines = true;      break;
+        case 'S': charset   = "IBM437";  break;
+        case 'D': Dflag     = true;      break;
+        case 't': cmpfunc   = mtimesort; break;
+        case 'c': cmpfunc   = ctimesort;
+                  cflag     = true;      break;
+        case 'r': reverse   = true;      break;
+        case 'v': cmpfunc   = versort;   break;
+        case 'U': cmpfunc   = NULL;      break;
+        case 'X': Hflag     = false;
+                  Xflag     = true;      break;
+        case 'J': Jflag     = true;      break;
+        case 'H': Hflag     = true;
+                  Xflag     = false;
+                  if (argv[n] == NULL) {
+                    fprintf(stderr,"tree: missing argument to -H option.\n");
+                    exit(1);
+                  }
+                  host = argv[n++];
+                  sp = "&nbsp;";         break;
+        case 'T': if (argv[n] == NULL) {
+                    fprintf(stderr,"tree: missing argument to -T option.\n");
+                    exit(1);
+                  }
+                  title     = argv[n++]; break;
+        case 'R': Rflag     = true;      break;
+        case 'L': if ((sLevel = argv[n++]) == NULL) {
+                    fprintf(stderr,"tree: Missing argument to -L option.\n");
+                    exit(1);
+                  }
+                  Level = strtoul(sLevel,NULL,0)-1;
+                  if (Level < 0) {
+                    fprintf(stderr,"tree: Invalid level, must be greater than 0.\n");
+                    exit(1);
+                  }
+                  break;
+        case 'o': if (argv[n] == NULL) {
+                    fprintf(stderr,"tree: missing argument to -o option.\n");
+                    exit(1);
+                  }
+                  outfilename = argv[n++];
+                  break;
         case '-':
           if (j == 1) {
             if (!strcmp("--", argv[i])) {
