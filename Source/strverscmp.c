@@ -87,9 +87,7 @@ because filenames frequently hold indices/version numbers.
    returning less than, equal to or greater than zero if S1 is less than,
    equal to or greater than S2 (for more info, see the Glibc texinfo doc).  */
 
-int
-strverscmp (const char *s1, const char *s2)
-{
+int strverscmp (const char *s1, const char *s2) {
   const unsigned char *p1 = (const unsigned char *) s1;
   const unsigned char *p2 = (const unsigned char *) s2;
   unsigned char c1, c2;
