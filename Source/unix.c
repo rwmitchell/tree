@@ -51,7 +51,8 @@ char *get_dirname( const char *name ) {
   return( nname );
 }
 
-off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev) {
+off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
+{
   char *path;
   bool nlf = false, colored = false;
   long pathsize = 0;
@@ -190,7 +191,8 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev) {
   return 0;
 }
 
-off_t unix_rlistdir(char *d, int *dt, int *ft, u_long lev, dev_t dev) {
+off_t unix_rlistdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
+{
   struct _info **dir;
   off_t size = 0;
   char *err;
@@ -204,7 +206,8 @@ off_t unix_rlistdir(char *d, int *dt, int *ft, u_long lev, dev_t dev) {
   return size;
 }
 
-void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev) {
+void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
+{
   char *path;
   long pathsize = 0;
   struct _info **sav = dir;

@@ -49,7 +49,8 @@ extern char *endcode;
 ]
 */
 
-off_t json_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev) {
+off_t json_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
+{
   char *path;
   bool nlf = false;
   long pathsize = 0;
@@ -178,7 +179,8 @@ off_t json_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev) {
   return 0;
 }
 
-off_t json_rlistdir(char *d, int *dt, int *ft, u_long lev, dev_t dev) {
+off_t json_rlistdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
+{
   struct _info **dir;
   off_t size = 0;
   char *err;
@@ -192,7 +194,8 @@ off_t json_rlistdir(char *d, int *dt, int *ft, u_long lev, dev_t dev) {
   return size;
 }
 
-void jsonr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev) {
+void jsonr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
+{
   char *path;
   long pathsize = 0;
   struct _info **sav = dir;
@@ -280,7 +283,8 @@ void jsonr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev) {
   free_dir(sav);
 }
 
-void json_indent(int maxlevel) {
+void json_indent(int maxlevel)
+{
   int i;
 
   fprintf(outfile, "    ");
@@ -288,7 +292,8 @@ void json_indent(int maxlevel) {
     fprintf(outfile, "  ");
 }
 
-void json_fillinfo(struct _info *ent) {
+void json_fillinfo(struct _info *ent)
+{
   #ifdef __USE_FILE_OFFSET64
   if (inodeflag) fprintf(outfile,",\"inode\":%lld",(long long)ent->inode);
   #else
