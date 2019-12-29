@@ -31,7 +31,9 @@ extern int Level, *dirs, maxdirs;
 extern bool colorize, linktargetcolor,
             showsym;
 extern char *endcode;
-extern char *firstdir;  // RWM
+extern char *firstdir,  // RWM
+            *TRCOLOR,
+            *COL_clr;
 
 char *get_dirname( const char *name ) {
   int rc;
@@ -228,10 +230,18 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
     if ( firstdir ) {
       int n = cnt_printable( path );
       n += n>0 ? 3 : 0;     // add 3 if n is > 0
+#ifdef  USE_PROPER_COLOR
       if (colorize) colored = color( S_IFDIR, firstdir, false, false);
+#else
+      if (colorize) colored = fprintf( outfile, "%s", TRCOLOR );
+#endif
       firstdir = get_dirname( firstdir );
       fprintf(outfile, "%*s%s\n", n, n ? " " : "", firstdir );
+#ifdef  USE_PROPER_COLOR
       if (colored) fprintf(outfile,"%s",endcode);
+#else
+      if (colored) fprintf(outfile,"%s",COL_clr);
+#endif
       free( firstdir );
       firstdir = NULL;
     }
