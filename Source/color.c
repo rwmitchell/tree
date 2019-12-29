@@ -169,17 +169,22 @@ extern
 char *FSCOLOR,
      *TRCOLOR,
      *AGE_cols[],
+     *LVL_cols[],      // colorize levels when only dirs are shown
      *COL_clr;
 extern
-int   AGE_ftcnt;
+int   AGE_ftcnt,
+      LVL_cnt;         // count of LVL_cols entries
 extern
 unsigned long AGE_secs[];
 
   env = getenv( "ELS_FS_COLOR" );     // color file size
   if ( env ) asprintf( &FSCOLOR, "[%sm", env );
 
-  env = getenv( "ELS_FT_COLORS");     // color by file age
+  // do not index array for LVL_cols, using AGE_secs as dummy field
+  env = getenv( "TREE_LEVELS");       // color by level depth
+  if ( env )   LVL_cnt = age_env2ft( env, ':', AGE_secs, LVL_cols );
 
+  env = getenv( "ELS_FT_COLORS");     // color by file age
   if ( env ) AGE_ftcnt = age_env2ft( env, ':', AGE_secs, AGE_cols );
 
   env = getenv( "TREE_COLOR"   );     // tree color
@@ -209,6 +214,9 @@ char **split(char *str, const char *delim, int *nwrds) {
 int age_env2ft( char *env, char sep, unsigned long *age, char **col ) {  // RWM
   int  cnt = 0;
   char *p1, *p2;
+  // routine is too sensitive on the env variable being exactly right
+  // with an ending :-1;nn:
+  // or it will segfault
 
   p1 = env;
   while ( *p1 ) {

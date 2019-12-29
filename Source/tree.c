@@ -54,8 +54,10 @@ int mb_cur_max;
 char *FSCOLOR = (char *) "", // file size color
      *TRCOLOR = (char *) "", // tree color set string
      *AGE_cols[32],          // file age  colors
+     *LVL_cols[32],          // indent level colors
      *COL_clr = (char *) ""; //           color clear string
-int   AGE_ftcnt = 0;
+int   AGE_ftcnt = 0,
+      LVL_cnt   = 0;
 unsigned long AGE_secs[32];  // 32 date colors
 time_t The_Time; // = time( NULL );
 off_t dusize = 0;
@@ -1112,24 +1114,34 @@ int patmatch(char *buf, char *pat)
 void indent(int maxlevel)
 {
   int i;
+  char *col = TRCOLOR,
+        tmp[16];
+
+  if ( LVL_cnt ) {
+    sprintf( tmp, "[%sm", LVL_cols[ maxlevel < LVL_cnt ? maxlevel : LVL_cnt-1 ] );
+    col = tmp;
+  }
 
   if (ansilines) {
-    if (dirs[0]) fprintf(outfile,"%s\033(0%s", TRCOLOR, COL_clr );
+    if (dirs[0]) fprintf(outfile,"%s\033(0%s", col, COL_clr );
     for(i=0; (i <= maxlevel) && dirs[i]; i++) {
       if (dirs[i+1]) {
-        if (dirs[i] == 1) fprintf(outfile,"%s\170%s   ", TRCOLOR, COL_clr );
+        if (dirs[i] == 1) fprintf(outfile,"%s\170%s   ", col, COL_clr );
         else printf("    ");
       } else {
-        if (dirs[i] == 1) fprintf(outfile,"%s\164\161\161%s ", TRCOLOR, COL_clr );
-        else fprintf(outfile,"%s\155\161\161%s ", TRCOLOR, COL_clr );
+        if (dirs[i] == 1) fprintf(outfile,"%s\164\161\161%s ", col, COL_clr );
+        else fprintf(outfile,"%s\155\161\161%s ", col, COL_clr );
       }
     }
-    if (dirs[0]) fprintf(outfile,"%s\033(B%s", TRCOLOR, COL_clr );
+    if (dirs[0]) fprintf(outfile,"%s\033(B%s", col, COL_clr );
   } else {
     if (Hflag) fprintf(outfile,"\t");
     for(i=0; (i <= maxlevel) && dirs[i]; i++) {
+      if ( LVL_cnt ) {
+        sprintf( tmp, "[%sm", LVL_cols[ i < LVL_cnt ? i : LVL_cnt-1 ] );
+      }
       fprintf(outfile,"%s%s%s ",
-              TRCOLOR,
+              col,
               dirs[i+1] ? (dirs[i]==1 ? linedraw->vert     : (Hflag? "&nbsp;&nbsp;&nbsp;" : "   ") )
                         : (dirs[i]==1 ? linedraw->vert_left:linedraw->corner),
               COL_clr );
