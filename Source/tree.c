@@ -55,6 +55,7 @@ char *FSCOLOR = (char *) "", // file size color
      *TRCOLOR = (char *) "", // tree color set string
      *AGE_cols[32],          // file age  colors
      *LVL_cols[32],          // indent level colors
+      lvl_colr[32] = {"\0"}, // current level color with escape codes
      *COL_clr = (char *) ""; //           color clear string
 int   AGE_ftcnt = 0,
       LVL_cnt   = 0;
@@ -1114,12 +1115,11 @@ int patmatch(char *buf, char *pat)
 void indent(int maxlevel)
 {
   int i;
-  char *col = TRCOLOR,
-        tmp[16];
+  char *col = TRCOLOR;
 
   if ( LVL_cnt ) {
-    sprintf( tmp, "[%sm", LVL_cols[ maxlevel < LVL_cnt ? maxlevel : LVL_cnt-1 ] );
-    col = tmp;
+    sprintf( lvl_colr, "[%sm", LVL_cols[ maxlevel < LVL_cnt ? maxlevel : LVL_cnt-1 ] );
+    col = lvl_colr;
   }
 
   if (ansilines) {
@@ -1137,9 +1137,9 @@ void indent(int maxlevel)
   } else {
     if (Hflag) fprintf(outfile,"\t");
     for(i=0; (i <= maxlevel) && dirs[i]; i++) {
-      if ( LVL_cnt ) {
-        sprintf( tmp, "[%sm", LVL_cols[ i < LVL_cnt ? i : LVL_cnt-1 ] );
-      }
+      if ( LVL_cnt )
+        sprintf( lvl_colr, "[%sm", LVL_cols[ i < LVL_cnt ? i : LVL_cnt-1 ] );
+
       fprintf(outfile,"%s%s%s ",
               col,
               dirs[i+1] ? (dirs[i]==1 ? linedraw->vert     : (Hflag? "&nbsp;&nbsp;&nbsp;" : "   ") )

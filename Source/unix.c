@@ -33,7 +33,8 @@ extern bool colorize, linktargetcolor,
 extern char *endcode;
 extern char *firstdir,  // RWM
             *TRCOLOR,
-            *COL_clr;
+            *COL_clr,
+             lvl_colr[];
 
 char *get_dirname( const char *name ) {
   int rc;
@@ -254,7 +255,11 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
 
     if (colorize) {
       if ((*dir)->lnk && linktargetcolor) colored = color((*dir)->lnkmode,(*dir)->name,(*dir)->orphan,false);
-      else colored = color((*dir)->mode,(*dir)->name,(*dir)->orphan,false);
+      else {
+        // use LSCOLOR if showing files or dir is a symlink
+        if ( !dflag || (*dir)->lnk )      colored = color((*dir)->mode,   (*dir)->name,(*dir)->orphan,false);
+        else                              colored = fprintf(outfile, "%s", lvl_colr);
+      }
     }
 
     if (fflag) {
@@ -265,7 +270,7 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
     } else {
       if (sizeof(char) * (strlen((*dir)->name)+1) > (u_long) pathsize)
         path = (char *) xrealloc(path,pathsize=(sizeof(char) * (strlen((*dir)->name)+1024)));
-      sprintf(path,"%s",(*dir)->name);
+      sprintf(path,"%s",             (*dir)->name);
     }
 
     printit(path);
