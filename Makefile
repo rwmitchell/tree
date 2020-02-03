@@ -56,6 +56,8 @@ DEP = $(MCH)/.dep/$(DIR)
 DST = $(BAS)/bin
 OBJ = $(BAS)/obj
 LIB = $(BAS)/lib
+WHICH = which
+DEVNUL = /dev/null
 
 # Override this on the cmdline with: make prefix=/some/where/else
 bin_prefix = $(BLD)
@@ -107,6 +109,8 @@ all:	          \
 	$(DST_PROGS)  \
 	tags          \
 	show_install  \
+
+# ifeq (0, $(words $(findstring $(MAKECMDGOALS), $(NODEPS))))
 
 $(DST_PROGS):	$(DST)/%:	$(OBJ)/%.o $(OBJ_FILES)
 	$(CC) $(LD_FLAGS) -o $@ $^
@@ -200,7 +204,13 @@ $(SRC)/.types.vim: $(SRC)/*.[ch]
 # End types
 
 tags: $(SRC)/*
+ifeq ($(shell ${WHICH} ctags 2>${DEVNUL}),)
+	@ printf "ctags is not in your system PATH\n"
+	@ printf "not making tags\n"
+else
 	ctags --fields=+l --langmap=c:.c.h $(SRC)/*
+endif
+
 
 #
 # ##########################################################
@@ -230,7 +240,7 @@ tags: $(SRC)/*
 # distclean:
 # 	if [ -f tree.o ]; then rm *.o; fi
 # 	rm -f *~
-	
+
 
 # dist:	distclean
 # 	tar zcf ../tree-$(VERSION).tgz -C .. `cat .tarball`
