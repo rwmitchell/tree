@@ -156,7 +156,8 @@ struct _info **fprune(struct _info *head, bool matched, bool root)
 struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **err)
 {
   FILE *fp = (strcmp(d,".")? fopen(d,"r") : stdin);
-  char *path, *spath, *s;
+  char *path, *spath, *s,
+       *space;                   // pointer to first  space  // XYZZY - rwm
   long pathsize;
   struct _info *root = NULL, **cwd, *ent;
   int l, tok;
@@ -171,6 +172,8 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 
   while(fgets(path, pathsize, fp) != NULL) {
     if (file_comment != NULL && strcmp(path,file_comment) == 0) continue;
+    space = strchr( path, ' ');                              // XYZZY - rwm
+    if ( space ) *space = '\0';  // truncate at first space  // XYZZY - rwm
     l = strlen(path);
     while(l && isspace(path[l-1])) path[--l] = '\0';
     if (l == 0) continue;
