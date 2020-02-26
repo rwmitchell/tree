@@ -152,12 +152,49 @@ struct _info **fprune(struct _info *head, bool matched, bool root)
 
   return dir;
 }
+// get_nums() from numfilt.c
+void get_nums     ( char  *str, char *num  ) {       // strip non-numerics from string
+  char
+      *pt, *pf;
+  int cnt=0;
+  pf = str;
+  pt = num;
 
+#ifdef PROFILE_ON
+  double t = NOW();
+#endif
+  // gather the numbers from the string
+  while ( *pf != '\0' ) {
+    if ( isdigit( *pf ) || *pf == '-' || *pf == '.' ) {
+      if ( isdigit( *pf ) && *(pf+1) == '-' )  {
+        *(pf+1) = ' ';      // hypen used as separator, change to space
+        --pf;
+      } else
+      if ( isdigit( *pf ) || isdigit( *(pf+1)) )  {
+        *pt++ = *pf;
+        ++cnt;
+      }
+    } else if ( cnt > 0 ) {
+      *pt++ = ' ';
+      cnt = 0;
+    }
+
+    ++pf;
+  }
+  if ( *(pt-1) == ' ' ) *(pt--) = '\0';  // remove trailing space when alpha trails
+  *pt='\0';
+
+#ifdef PROFILE_ON
+  time_get_nums += ( NOW() - t );
+  if ( debug & 0x100000 ) BUGOUT("%2d:%s: >%s<\n", cnt, str, num );
+#endif
+}
 struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **err)
 {
   FILE *fp = (strcmp(d,".")? fopen(d,"r") : stdin);
   char *path, *spath, *s,
-       *space;                   // pointer to first  space  // XYZZY - rwm
+       *space,                   // pointer to first  space  // XYZZY - rwm
+        snum[512];               // 512 should be enough for anyone
   long pathsize;
   struct _info *root = NULL, **cwd, *ent;
   int l, tok;
@@ -174,6 +211,8 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
     if (file_comment != NULL && strcmp(path,file_comment) == 0) continue;
     space = strchr( path, ' ');                              // XYZZY - rwm
     if ( space ) *space = '\0';  // truncate at first space  // XYZZY - rwm
+    space++;  // advance to what comes after
+    get_nums( space, snum );      // get any numbers in string
     l = strlen(path);
     while(l && isspace(path[l-1])) path[--l] = '\0';
     if (l == 0) continue;
@@ -193,8 +232,10 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
           if (tok == T_DIR) {
             ent->isdir = 1;
             ent->mode = S_IFDIR;
+            ent->size++;                           // count entries in dir     - rwm
           } else {
             ent->mode = S_IFREG;
+            ent->size = strtol( snum, NULL, 10 );  // first number after space - rwm
           }
           cwd = &(ent->tchild);
           break;
