@@ -209,10 +209,13 @@ struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 
   while(fgets(path, pathsize, fp) != NULL) {
     if (file_comment != NULL && strcmp(path,file_comment) == 0) continue;
+    memset( snum, '\0', 512 );
     space = strchr( path, ' ');                              // XYZZY - rwm
-    if ( space ) *space = '\0';  // truncate at first space  // XYZZY - rwm
-    space++;  // advance to what comes after
-    get_nums( space, snum );      // get any numbers in string
+    if ( space ) {
+      *space = '\0';             // truncate at first space  // XYZZY - rwm
+      space++;                   // advance to what comes after
+      get_nums( space, snum );   // get any numbers in string
+    }
     l = strlen(path);
     while(l && isspace(path[l-1])) path[--l] = '\0';
     if (l == 0) continue;
