@@ -190,7 +190,7 @@ unsigned long AGE_secs[];
   env = getenv( "TREE_COLOR"   );     // tree color
   if ( env ) asprintf( &TRCOLOR, "[%sm", env );
 
-  asprintf( &COL_clr, "[39m");
+  asprintf( &COL_clr, "[39;0m");
 }
 /*
  * You must free the pointer that is allocated by split() after you

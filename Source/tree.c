@@ -1211,7 +1211,7 @@ char *do_date(time_t t)
       strftime(tmp,255,"%b %e %R", tm);
   }
 
-  if ( i < AGE_ftcnt ) snprintf(buf,255,"[%sm%s[39m",  AGE_cols[i], tmp);
+  if ( i < AGE_ftcnt ) snprintf(buf,255,"[%sm%s%s",  AGE_cols[i], tmp, COL_clr );
   else strcpy( buf, tmp );
 
   return buf;
