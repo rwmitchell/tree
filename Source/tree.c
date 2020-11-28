@@ -33,6 +33,7 @@ bool Hflag, siflag, cflag, Xflag, Jflag, duflag, pruneflag;
 bool noindent, force_color, nocolor, xdev, noreport, nolinks, flimit, dirsfirst;
 bool ignorecase, matchdirs, fromfile;
 bool reverse;
+bool lsicons = false;
 char *pattern = NULL, *ipattern = NULL, *host = NULL;
 const
 char *title = "Directory Tree", *sp = " ", *_nl = "\n",

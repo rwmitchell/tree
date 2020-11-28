@@ -113,6 +113,7 @@ struct colortable {
 struct extensions {
   char *ext;
   char *term_flg, *CSS_name, *web_fg, *web_bg, *web_extattr;
+  char *glyph;
   struct extensions *nxt;
 };
 struct linedraw {

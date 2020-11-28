@@ -47,8 +47,12 @@ enum {
 
 bool colorize = false, ansilines = false, linktargetcolor = false;
 char *term, termmatch = false, istty;
-char *leftcode      = NULL,  *rightcode    = NULL, *endcode     = NULL;
+char *leftcode      = NULL,  *rightcode    = NULL, *endcode     = NULL,
+     *forecode      = "[38;5;",   // foreground
+     *backcode      = "[48;5;";   // background
 
+char *all_flags[ERROR+1],
+     *all_glyph[ERROR+1];
 char *norm_flgs     = NULL,  *file_flgs    = NULL, *dir_flgs    = NULL, *link_flgs = NULL;
 char *fifo_flgs     = NULL,  *door_flgs    = NULL, *block_flgs  = NULL, *char_flgs = NULL;
 char *orphan_flgs   = NULL,  *sock_flgs    = NULL, *suid_flgs   = NULL, *sgid_flgs = NULL;
@@ -70,14 +74,14 @@ char **split(char *str, const char *delim, int *nwrds);
 int cmd(char *s);
 
 extern FILE *outfile;
-extern bool Hflag, force_color, nocolor;
+extern bool Hflag, force_color, nocolor, lsicons;
 extern const char *charset;
 
 void parse_dir_colors() {
   const
   char *s;
-  char buf[1025], **arg, **c, *colors, *cc;
-  int i, n;
+  char buf[1025], **arg, **c, *colors, *cc, *pt;
+  int i, n, j;
   struct extensions *e;
 
   if (Hflag) return;
@@ -87,8 +91,9 @@ void parse_dir_colors() {
     return;
   }
 
-  s = getenv("TREE_COLORS");
-  if (s == NULL) s = getenv("LS_COLORS");
+  s = getenv("LS_ICONS");
+  if ( s ) lsicons = true;
+  else s = getenv("LS_COLORS");
   cc = getenv("CLICOLOR");
   if (getenv("CLICOLOR_FORCE") != NULL) force_color=true;
   if ((s == NULL || strlen(s) == 0) && (force_color || cc != NULL)) s = ":no=00:fi=00:di=01;34:ln=01;36:pi=40;33:so=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.bat=01;32:*.BAT=01;32:*.btm=01;32:*.BTM=01;32:*.cmd=01;32:*.CMD=01;32:*.com=01;32:*.COM=01;32:*.dll=01;32:*.DLL=01;32:*.exe=01;32:*.EXE=01;32:*.arj=01;31:*.bz2=01;31:*.deb=01;31:*.gz=01;31:*.lzh=01;31:*.rpm=01;31:*.tar=01;31:*.taz=01;31:*.tb2=01;31:*.tbz2=01;31:*.tbz=01;31:*.tgz=01;31:*.tz2=01;31:*.z=01;31:*.Z=01;31:*.zip=01;31:*.ZIP=01;31:*.zoo=01;31:*.asf=01;35:*.ASF=01;35:*.avi=01;35:*.AVI=01;35:*.bmp=01;35:*.BMP=01;35:*.flac=01;35:*.FLAC=01;35:*.gif=01;35:*.GIF=01;35:*.jpg=01;35:*.JPG=01;35:*.jpeg=01;35:*.JPEG=01;35:*.m2a=01;35:*.M2a=01;35:*.m2v=01;35:*.M2V=01;35:*.mov=01;35:*.MOV=01;35:*.mp3=01;35:*.MP3=01;35:*.mpeg=01;35:*.MPEG=01;35:*.mpg=01;35:*.MPG=01;35:*.ogg=01;35:*.OGG=01;35:*.ppm=01;35:*.rm=01;35:*.RM=01;35:*.tga=01;35:*.TGA=01;35:*.tif=01;35:*.TIF=01;35:*.wav=01;35:*.WAV=01;35:*.wmv=01;35:*.WMV=01;35:*.xbm=01;35:*.xpm=01;35:";
@@ -108,7 +113,18 @@ void parse_dir_colors() {
 
   for(i=0;arg[i];i++) {
     c = split(arg[i],"=",&n);
-    switch(cmd(c[0])) {
+
+    if ( (j=cmd( c[0] )) <  ERROR ) {
+      all_flags[j] = scopy(c[1]);
+      if ( lsicons ) {
+         pt = strrchr( all_flags[j], ';' );
+        *pt = '\0';
+        all_glyph[j]    = pt+1;
+//      printf( "%2d: %s :: %s\n", j, all_glyph[j], c[0] );
+      }
+    }
+
+    switch( cmd( c[0] ) ) {
       case COL_NORMAL: if (c[1]) norm_flgs = scopy(c[1]); break;
       case COL_FILE:   if (c[1]) file_flgs = scopy(c[1]); break;
       case COL_DIR:    if (c[1])  dir_flgs = scopy(c[1]); break;
@@ -141,12 +157,18 @@ void parse_dir_colors() {
           e           = xmalloc(sizeof(struct extensions));
           e->ext      = scopy(c[0]+1);
           e->term_flg = scopy(c[1]);
+          if ( lsicons ) {
+             pt = strrchr( e->term_flg, ';' );
+            *pt = '\0'; ++pt;
+            e->glyph    = pt;
+          }
           e->nxt      = ext;
           ext         = e;
         }
     }
     free(c);
   }
+  for ( i=0; i<ERROR; ++i ) if ( all_glyph[i] ) printf( "%2d: %s\n", i, all_glyph[i] );
   free(arg);
 
   /* make sure at least norm_flgs is defined.  We're going to assume vt100 support */
@@ -255,19 +277,51 @@ int cmd(char *s) {
     char *cmd;
     char cmdnum;
   } cmds[] = {
-    {"no", COL_NORMAL}, {"fi", COL_FILE}, {"di", COL_DIR}, {"ln", COL_LINK}, {"pi", COL_FIFO},
-    {"do", COL_DOOR}, {"bd", COL_BLK}, {"cd", COL_CHR}, {"or", COL_ORPHAN}, {"so", COL_SOCK},
-    {"su", COL_SETUID}, {"sg", COL_SETGID}, {"tw", COL_STICKY_OTHER_WRITABLE}, {"ow", COL_OTHER_WRITABLE},
-    {"st", COL_STICKY}, {"ex", COL_EXEC}, {"mi", COL_MISSING}, {"lc", COL_LEFTCODE}, {"rc", COL_RIGHTCODE},
-    {"ec", COL_ENDCODE}, {NULL, 0}
+    {"no", COL_NORMAL},       {"fi", COL_FILE},
+    {"di", COL_DIR},          {"ln", COL_LINK},
+    {"pi", COL_FIFO},         {"do", COL_DOOR},
+    {"bd", COL_BLK},          {"cd", COL_CHR},
+    {"or", COL_ORPHAN},       {"so", COL_SOCK},
+    {"su", COL_SETUID},       {"sg", COL_SETGID},
+    {"tw", COL_STICKY_OTHER_WRITABLE},
+    {"ow", COL_OTHER_WRITABLE},
+    {"st", COL_STICKY},       {"ex", COL_EXEC},
+    {"mi", COL_MISSING},      {"lc", COL_LEFTCODE},
+    {"rc", COL_RIGHTCODE},    {"ec", COL_ENDCODE},
+    {"NORMAL",    COL_NORMAL},   {"FILE", COL_FILE},
+    {"DIRECTORY", COL_DIR},      {"LINK", COL_LINK},
+    {"FIFO",      COL_FIFO},     {"DOOR", COL_DOOR},
+    {"BLOCK",     COL_BLK},      {"CHARDEV", COL_CHR},
+    {"ORPHAN",    COL_ORPHAN},   {"SOCKET", COL_SOCK},
+    {"SETUID",    COL_SETUID},   {"SETGID", COL_SETGID},
+    {"STOTHERWRITE", COL_STICKY_OTHER_WRITABLE},
+    {"OTHERWRITE",   COL_OTHER_WRITABLE},
+    {"STICKY",    COL_STICKY},   {"EXEC", COL_EXEC},
+    {"MISSING",   COL_MISSING},
+    {NULL, 0}
   };
   int i;
 
-  if (s[0] == '*') return DOT_EXTENSION;
+  if (s[0] == '*'
+   || s[0] == '.'
+   || s[0] == '^' ) return DOT_EXTENSION;
+
   for(i=0;cmds[i].cmdnum;i++) {
     if (!strcmp(cmds[i].cmd,s)) return cmds[i].cmdnum;
   }
   return ERROR;
+}
+
+void color_256( FILE *fout, char *code, char *glyph ) {
+
+  if ( lsicons ) {
+    int f, b, s,   // fg, bg, style
+        rc;
+    rc = sscanf( code, "%d;%d;%d", &f, &b, &s );
+    fprintf( fout, "%s%d%s", forecode, f, rightcode );
+    fprintf( fout,"%s ", glyph ? glyph : "A");
+  } else
+    fprintf(outfile,"%s%s%s",leftcode,code,rightcode);
 }
 
 int color(u_short mode, char *name, bool orphan, bool islink) {
@@ -277,12 +331,12 @@ int color(u_short mode, char *name, bool orphan, bool islink) {
   if (orphan) {
     if (islink) {
       if (missing_flgs) {
-        fprintf(outfile,"%s%s%s",leftcode,missing_flgs,rightcode);
+        color_256( outfile, missing_flgs, all_glyph[ COL_MISSING ] );
         return true;
       }
     } else {
       if (orphan_flgs) {
-        fprintf(outfile,"%s%s%s",leftcode,orphan_flgs,rightcode);
+        color_256( outfile, orphan_flgs, all_glyph[ COL_ORPHAN ] );
         return true;
       }
     }
@@ -290,62 +344,62 @@ int color(u_short mode, char *name, bool orphan, bool islink) {
   switch(mode & S_IFMT) {
     case S_IFIFO:
       if (!fifo_flgs) return false;
-      fprintf(outfile,"%s%s%s",leftcode,fifo_flgs,rightcode);
+      color_256( outfile, fifo_flgs, all_glyph[ COL_FIFO ] );
       return true;
     case S_IFCHR:
       if (!char_flgs) return false;
-      fprintf(outfile,"%s%s%s",leftcode,char_flgs,rightcode);
+      color_256( outfile, char_flgs, all_glyph[ COL_CHR ] );
       return true;
     case S_IFDIR:
       if (mode & S_ISVTX) {
         if ((mode & S_IWOTH) && stickyow_flgs) {
-          fprintf(outfile, "%s%s%s",leftcode,stickyow_flgs,rightcode);
+          color_256( outfile, stickyow_flgs, all_glyph[ COL_STICKY_OTHER_WRITABLE ] );
           return true;
         }
         if (!(mode & S_IWOTH) && sticky_flgs) {
-          fprintf(outfile, "%s%s%s",leftcode,sticky_flgs,rightcode);
+          color_256( outfile, sticky_flgs, all_glyph[ COL_STICKY ] );
           return true;
         }
       }
       if ((mode & S_IWOTH) && otherwr_flgs) {
-        fprintf(outfile,"%s%s%s",leftcode,otherwr_flgs,rightcode);
+        color_256( outfile, otherwr_flgs, all_glyph[ COL_OTHER_WRITABLE ] );
         return true;
       }
       if (!dir_flgs) return false;
-      fprintf(outfile,"%s%s%s",leftcode,dir_flgs,rightcode);
+      color_256( outfile, dir_flgs, all_glyph[ COL_DIR ] );
       return true;
 #ifndef __EMX__
     case S_IFBLK:
       if (!block_flgs) return false;
-      fprintf(outfile,"%s%s%s",leftcode,block_flgs,rightcode);
+      color_256( outfile, block_flgs, all_glyph[ COL_BLK ] );
       return true;
     case S_IFLNK:
       if (!link_flgs) return false;
-      fprintf(outfile,"%s%s%s",leftcode,link_flgs,rightcode);
+      color_256( outfile, link_flgs, all_glyph[ COL_LINK ] );
       return true;
   #ifdef S_IFDOOR
     case S_IFDOOR:
       if (!door_flgs) return false;
-      fprintf(outfile,"%s%s%s",leftcode,door_flgs,rightcode);
+      color_256( outfile, door_flgs, all_glyph[ COL_DOOR ] );
       return true;
   #endif
 #endif
     case S_IFSOCK:
       if (!sock_flgs) return false;
-      fprintf(outfile,"%s%s%s",leftcode,sock_flgs,rightcode);
+      color_256( outfile, sock_flgs, all_glyph[ COL_SOCK ] );
       return true;
     case S_IFREG:
       if ((mode & S_ISUID) && suid_flgs) {
-        fprintf(outfile,"%s%s%s",leftcode,suid_flgs,rightcode);
+        color_256( outfile, suid_flgs, all_glyph[ COL_SETUID ] );
         return true;
       }
       if ((mode & S_ISGID) && sgid_flgs) {
-        fprintf(outfile,"%s%s%s",leftcode,sgid_flgs,rightcode);
+        color_256( outfile, sgid_flgs, all_glyph[ COL_SETGID ] );
         return true;
       }
-      if (!exec_flgs) return false;
+      if (!exec_flgs) return false;      // needs 'ex' in LSICONS
       if (mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
-        fprintf(outfile,"%s%s%s",leftcode,exec_flgs,rightcode);
+        color_256( outfile, exec_flgs, all_glyph[ COL_EXEC ] );
         return true;
       }
       /* not a directory, link, special device, etc, so check for extension match */
@@ -353,12 +407,14 @@ int color(u_short mode, char *name, bool orphan, bool islink) {
       for(e=ext;e;e=e->nxt) {
         xl = strlen(e->ext);
         if (!strcmp((l>xl)?name+(l-xl):name,e->ext)) {
-          fprintf(outfile,"%s%s%s",leftcode,e->term_flg,rightcode);
+          if ( lsicons ) color_256( outfile, e->term_flg, e->glyph );
           return true;
         }
       }
+      if ( lsicons ) fprintf( outfile, "X " );
       return false;
-  }
+    }
+    if ( lsicons ) fprintf( outfile, "Y " );
   return false;
 }
 
