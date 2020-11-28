@@ -258,7 +258,10 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
       else {
         // use LSCOLOR if showing files or dir is a symlink
         if ( !dflag || (*dir)->lnk )      colored = color((*dir)->mode,   (*dir)->name,(*dir)->orphan,false);
-        else                              colored = fprintf(outfile, "%s", lvl_colr);
+        else {
+          color( (*dir)->mode, (*dir)->name, (*dir)->orphan, false );
+          colored = fprintf(outfile, "%s ", lvl_colr);
+        }
       }
     }
 
