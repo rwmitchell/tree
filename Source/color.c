@@ -111,11 +111,14 @@ void parse_dir_colors() {
 
   arg = split(colors,":",&n);
 
+  int ext_cnt=0;
+
   for(i=0;arg[i];i++) {
     c = split(arg[i],"=",&n);
 
     if ( (j=cmd( c[0] )) <  ERROR ) {
-      all_flags[j] = scopy(c[1]);
+      pt = all_flags[j] = scopy(c[1]);
+      while ( *pt != '\0' ) { *pt = toupper( *pt ); ++pt; }   //  uppercase pattern
       if ( lsicons ) {
          pt = strrchr( all_flags[j], ';' );
         *pt = '\0';
@@ -155,7 +158,8 @@ void parse_dir_colors() {
       case DOT_EXTENSION:
         if (c[1]) {
           e           = xmalloc(sizeof(struct extensions));
-          e->ext      = scopy(c[0]+1);
+          pt = e->ext = scopy(c[0]+0);
+          while ( *pt != '\0' ) { *pt = toupper( *pt ); ++pt; }   //  uppercase pattern
           e->term_flg = scopy(c[1]);
           if ( lsicons ) {
              pt = strrchr( e->term_flg, ';' );
@@ -164,11 +168,13 @@ void parse_dir_colors() {
           }
           e->nxt      = ext;
           ext         = e;
+          ext_cnt++;
         }
     }
     free(c);
   }
-  for ( i=0; i<ERROR; ++i ) if ( all_glyph[i] ) printf( "%2d: %s\n", i, all_glyph[i] );
+//for ( i=0; i<ERROR; ++i ) if ( all_glyph[i] ) printf( "%3d: %s\n", i, all_glyph[i] );
+//printf( "%3d: extensions\n", ext_cnt );
   free(arg);
 
   /* make sure at least norm_flgs is defined.  We're going to assume vt100 support */
@@ -309,6 +315,7 @@ int cmd(char *s) {
   for(i=0;cmds[i].cmdnum;i++) {
     if (!strcmp(cmds[i].cmd,s)) return cmds[i].cmdnum;
   }
+  return DOT_EXTENSION;
   return ERROR;
 }
 
@@ -323,6 +330,59 @@ void color_256( FILE *fout, char *code, char *glyph ) {
   } else
     fprintf(outfile,"%s%s%s",leftcode,code,rightcode);
 }
+
+#ifdef GO_WILD
+bool rwm_col_wild( char *fn, char y, int *b, int *f, int *s, int *i ) {
+  const
+  char *pls = NULL,
+       *ps;
+  char  pat[32],
+       *pt,
+       *tfn = strdup( fn );
+  int   d = 0;
+  Boole done = FALSE;
+
+  // reverse search method
+  //   find '*' in LSCOLOR/LSICON,
+  //   get associated pattern
+  //   find pattern _inside_ filename
+  //   assume format of:   :*PAT=
+
+  pt = tfn;
+  while ( *pt != '\0' ) { *pt = toupper( *pt ); ++pt; }
+
+  pls = rwm_doicons ? LSICONS : LSCOLOR;
+
+  while ( !done ) {
+    pls = strchr( pls, y );           // y='*', ''
+    if ( pls ) {
+      pls++;      // move past 'y' or pattern type char
+
+//    sscanf( pls, "%31s=", pat );    // sscanf() does NOT stop at =
+      ps = pls;
+      pt = pat;
+      int l=31;
+      while ( *ps != '=' ) { *pt++ = *ps++; l--; }
+      *pt = '\0';
+
+//    printf( "Wild: |%s| [%s]\n", tfn, pat );
+      if ( strstr( tfn, pat )) {      // found pat in filename
+        pls = strchr( pls, '=' );
+        if ( pls ) {
+          if ( ! rwm_doicons )
+            d=sscanf( pls, "=%d;%d;%d", b, f, s );
+          else
+            d=sscanf( pls, "=%d;%d;%d;%lc:", f, b, s, i );  // f / b order reversed
+          done = ( d >= 2 ) ? true : false;
+        }
+      }
+    } else done = true;
+  }
+  free( tfn );
+
+  return( d > 0 );
+}
+#endif
 
 int color(u_short mode, char *name, bool orphan, bool islink) {
   struct extensions *e;
@@ -403,12 +463,35 @@ int color(u_short mode, char *name, bool orphan, bool islink) {
         return true;
       }
       /* not a directory, link, special device, etc, so check for extension match */
+      char *pt,
+           *tname = strdup( name );
+      pt = tname;
+      while ( *pt != '\0'  ) { *pt = toupper( *pt  ); ++pt;  }   //  uppercase pattern
       l = strlen(name);
+      char *x;
       for(e=ext;e;e=e->nxt) {
+        pt = e->ext;
         xl = strlen(e->ext);
-        if (!strcmp((l>xl)?name+(l-xl):name,e->ext)) {
-          if ( lsicons ) color_256( outfile, e->term_flg, e->glyph );
-          return true;
+        switch( *pt ) {
+          case '.':
+            if (!strcmp((l>xl)?tname+(l-xl):tname,e->ext)) {
+//            fprintf( outfile, "<%s> ", e->ext );          // XYZZY
+              color_256( outfile, e->term_flg, e->glyph );
+              return true;
+            }
+            break;
+          case '*': pt++;
+          default: 
+            if ( xl > 2 ) {
+              if ( l > xl ) x = strstr( tname, pt );
+              else          x = strstr( pt, tname );
+              if ( x ) {
+//              fprintf( outfile, ">%d:%s< ", xl, e->ext );          // XYZZY
+                color_256( outfile, e->term_flg, e->glyph );
+                return true;
+              }
+            }
+            break;
         }
       }
       if ( lsicons ) fprintf( outfile, "X " );
