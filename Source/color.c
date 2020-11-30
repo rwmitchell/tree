@@ -475,18 +475,18 @@ int color(u_short mode, char *name, bool orphan, bool islink) {
         switch( *pt ) {
           case '.':
             if (!strcmp((l>xl)?tname+(l-xl):tname,e->ext)) {
-//            fprintf( outfile, "<%s> ", e->ext );          // XYZZY
+//            fprintf( outfile, "<%s> ", e->ext );               // XYZZY
               color_256( outfile, e->term_flg, e->glyph );
               return true;
             }
             break;
           case '*': pt++;
-          default: 
+          default:
             if ( xl > 2 ) {
               if ( l > xl ) x = strstr( tname, pt );
               else          x = strstr( pt, tname );
               if ( x ) {
-//              fprintf( outfile, ">%d:%s< ", xl, e->ext );          // XYZZY
+//              fprintf( outfile, ">%d:%s< ", xl, e->ext );      // XYZZY
                 color_256( outfile, e->term_flg, e->glyph );
                 return true;
               }
