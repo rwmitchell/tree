@@ -494,7 +494,9 @@ int color(u_short mode, char *name, bool orphan, bool islink) {
             break;
         }
       }
-      if ( lsicons ) fprintf( outfile, "X " );
+      // default if nothing above matched
+      if ( lsicons )
+        color_256( outfile, norm_flgs, all_glyph[ COL_FILE ] );
       return false;
     }
     if ( lsicons ) fprintf( outfile, "Y " );
