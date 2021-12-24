@@ -1046,8 +1046,7 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 
   off_t loc_dusize = dusize;
 
-//printf( "Starting: %10lld %10lld %10lld (%s)\n",
-//    (*dir)->size, *size, dusize, (*dir)->name );
+//printf( "Starting: %10lld [ %10lld %10lld ] (%s)\n", (*dir)->size, *size, dusize, (*dir)->name );
 
   dusize = 0;                    // RWM - reset before reading dir
 
@@ -1088,12 +1087,14 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
         continue;
       }
     }
-//  if (duflag) *size += (*dir)->siz
+//  if (duflag) *size += (*dir)->size
     if ( duflag) {
-//    printf( "Updating: %10lld %10lld %10lld (%s)\n", (*dir)->size, *size, dusize, (*dir)->name );
+//    printf( "Updating: %10lld %10lld [ %10lld %10lld : %10lld ] (%s)\n",
+//      (*dir)->size, *size, dusize, loc_dusize, (*dir)->size, (*dir)->name );
+      if ( dflag ) dusize += (*dir)->size;
       (*dir)->size += dusize;
       *size        += (*dir)->size;
-      dusize        = 0;
+//    dusize        = 0;
     }
     dir++;
   }
