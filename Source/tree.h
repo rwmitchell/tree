@@ -61,6 +61,22 @@
 #define mbstowcs(w,m,x) mbsrtowcs(w,(const char**)(& #m),x,NULL)
 #endif
 
+// Start using PATH_MAX instead of the magic number 4096 everywhere
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+
+#ifndef INFO_PATH
+#define INFO_PATH "/usr/share/finfo/global_info"
+#endif
+
+#ifdef __linux__
+#include <fcntl.h>
+# ifndef  STDDATA_FILENO
+#  define STDDATA_FILENO 3
+# endif
+#endif
+
 /* Should probably use strdup(), but we like our xmalloc() */
 #define scopy(x)        strcpy(xmalloc(strlen(x)+1),(x))
 #define MINIT           30      /* number of dir entries to initially allocate */
@@ -92,8 +108,27 @@ struct _info {
   long attr;
   #endif
   char *err;
+  const char *tag;
+  char **comment;
   struct _info **child, *next, *tchild;
 };
+
+// list.c
+struct totals {
+  u_long files, dirs;
+  off_t size;
+};
+struct listingcalls {
+  void ( *intro ) ( void );
+  void ( *outtro) ( void );
+  int  ( *printinfo ) ( char *dirname, struct _info *file, int level );
+  int  ( *printfile ) ( char *dirname, char *filename, struct _info *file, int descent );
+  int  ( *error     ) ( char *error );
+  void ( *newline   ) ( struct _info *file, int level, int postdir, int neeedcomma );
+  void ( *close     ) ( struct _info *file, int level,               int needcomma );
+  void ( *report    ) ( struct totals tot );
+};
+
 /* hash.c */
 struct xtable {
   unsigned int xid;
@@ -118,17 +153,59 @@ struct extensions {
 };
 struct linedraw {
   const char **name, *vert, *vert_left, *corner, *copy;
+  const char *ctop, *cbot, *cmid, *cext, *csingle;
 };
+
+struct meta_ids {
+  char *name,
+       *term_flg;
+};
+
+// filter.c
+struct pattern {
+  char *pattern;
+  struct pattern *next;
+};
+struct ignorefile {
+  char *path;
+  struct pattern *remove, *reverse;
+  struct ignorefile *next;
+};
+
+// info.c
+struct comment {
+  struct pattern *pattern;
+  char **desc;
+  struct comment *next;
+};
+struct infofile {
+  char *path;
+  struct comment *comments;
+  struct infofile *next;
+};
+
 void parse_env_colors();                                                // RWM
 int age_env2ft( char *env, char sep, unsigned long *age, char **col );  // RWM
 int cnt_printable( char *str );                                         // RWM
 
 /* Function prototypes: */
 /* tree.c */
+void setoutput( char *filename );
 void usage(int);
-struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **err);
-struct _info **read_dir(char *, int *);
+void push_files( char *dir, struct ignorefile **ig, struct infofile **inf );
+int patignore ( char *name );
+int patinclude( char *name );
 
+struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **err);
+#define ORIG_no
+#ifdef  ORIG
+struct _info **read_dir(char *, int *);
+#else
+struct _info **read_dir(char *, int *, int );
+#endif
+
+int filesfirst( struct _info **, struct _info ** );
+// int  dirsfirst( struct _info **, struct _info ** );
 int alnumsort(struct _info **, struct _info **);
 int versort(struct _info **a, struct _info **b);
 int reversealnumsort(struct _info **, struct _info **);
@@ -194,7 +271,24 @@ void saveino(ino_t, dev_t);
 /* file.c */
 struct _info **file_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **err);
 
+// filter.c
+void   gittrim( char * );
+struct pattern
+      *new_pattern( char * );
+int    filtercheck( char *, char * );
+struct ignorefile
+      *new_ignorefile ( char * ),
+      *pop_filterstack( void );
+void   push_filterstack( struct ignorefile * );
+
+// info.c
+struct infofile *new_infofile( char * );
+void   push_infostack( struct infofile * );
+struct infofile *pop_infostack( void );
+struct comment  *infocheck( char *, char *, int );
+void   printcomment( int, int, char * );
+
 /* We use the strverscmp.c file if we're not linux */
-#if ! defined (LINUX)
+#ifndef __linux__
 int strverscmp (const char *s1, const char *s2);
 #endif

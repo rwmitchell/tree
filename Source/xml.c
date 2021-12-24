@@ -77,7 +77,7 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
     dev = sb.st_dev;
   }
 
-  sav = dir = read_dir(d,&n);
+  sav = dir = read_dir(d,&n, false);
   if (!dir && n) {
     fprintf(outfile,"<error>opening dir</error>\n");
     return 0;

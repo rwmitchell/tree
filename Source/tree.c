@@ -31,10 +31,16 @@ bool dflag, lflag, pflag, sflag, Fflag, aflag, fflag, uflag, gflag;
 bool qflag, Nflag, Qflag, Dflag, inodeflag, devflag, hflag, Rflag;
 bool Hflag, siflag, cflag, Xflag, Jflag, duflag, pruneflag;
 bool noindent, force_color, nocolor, xdev, noreport, nolinks, flimit, dirsfirst;
-bool ignorecase, matchdirs, fromfile;
+bool ignorecase, matchdirs, fromfile, VCignore, showinfo;
 bool reverse;
 bool lsicons = false;
-char *pattern = NULL, *ipattern = NULL, *host = NULL;
+char *host = NULL;
+
+int  pattern = 0, maxpattern  = 0,
+    ipattern = 0, maxipattern = 0;
+char **patterns  = NULL,
+     **ipatterns = NULL;
+
 const
 char *title = "Directory Tree", *sp = " ", *_nl = "\n",
      *file_comment = "#", *file_pathsep = "/";
@@ -102,6 +108,16 @@ extern bool colorize, ansilines, linktargetcolor;
 extern char *leftcode, *rightcode, *endcode;
 extern const struct linedraw *linedraw;
 
+bool  RMisdir     ( const char *name ) {
+  struct stat sbuf;
+  bool        isdir = false;
+
+  if (stat(name,&sbuf) == 0)
+    if ( S_ISDIR( sbuf.st_mode ) ) isdir = true;
+
+  return( isdir );
+}
+
 int main(int argc, char **argv)
 {
   char **dirname = NULL;
@@ -115,10 +131,12 @@ int main(int argc, char **argv)
   q = p = dtotal = ftotal = 0;
   aflag = dflag = fflag = lflag = pflag = sflag = Fflag = uflag = gflag = false;
   Dflag = qflag = Nflag = Qflag = Rflag = hflag = Hflag = siflag = cflag = false;
-  noindent = force_color = nocolor = xdev = noreport = nolinks = reverse = false;
+  noindent   = force_color = nocolor = xdev = noreport = nolinks = reverse = false;
   ignorecase = matchdirs = dirsfirst = inodeflag = devflag = Xflag = Jflag = false;
-  duflag = true;
-  pruneflag = false;
+  duflag     = true;
+  pruneflag  = false;
+  VCignore   = false;
+  showinfo   = false;
   flimit = 0;
   dirs = (int *) xmalloc(sizeof(int) * (maxdirs=4096));
   memset(dirs, 0, sizeof(int) * maxdirs);
@@ -173,13 +191,19 @@ int main(int argc, char **argv)
                     fprintf(stderr,"tree: missing argument to -P option.\n");
                     exit(1);
                   }
-                  pattern = argv[n++];
+                  if ( pattern >= maxpattern-1 )
+                    patterns = xrealloc( patterns, sizeof( char *) * (maxpattern += 10 ) );
+                  patterns[ pattern++ ] = argv[n++];
+                  patterns[ pattern   ] = NULL;
                   break;
         case 'I': if (argv[n] == NULL) {
                     fprintf(stderr,"tree: missing argument to -I option.\n");
                     exit(1);
                   }
-                  ipattern = argv[n++];
+                  if ( ipattern >= maxipattern-1 )
+                    ipatterns = xrealloc( ipatterns, sizeof( char *) * (maxipattern += 10 ) );
+                  ipatterns[ ipattern++ ] = argv[n++];
+                  ipatterns[ ipattern   ] = NULL;
                   break;
         case 'A': ansilines = true;      break;
         case 'S': charset   = "IBM437";  break;
@@ -395,6 +419,19 @@ int main(int argc, char **argv)
               fromfile=true;
               break;
             }
+
+            if ( !strncmp( "--vcignore", argv[i], 10 ) ) {
+              j = strlen( argv[i] ) - 1;
+              VCignore = true;
+              break;
+            }
+
+            if ( !strncmp( "--info",     argv[i],  6 ) ) {
+              j = strlen( argv[i] ) - 1;
+              showinfo = true;
+              break;
+            }
+
             fprintf(stderr,"tree: Invalid argument `%s'.\n",argv[i]);
             usage(1);
             exit(1);
@@ -407,9 +444,11 @@ int main(int argc, char **argv)
         }
       }
     } else {
-      if (!dirname) dirname = (char **)xmalloc(sizeof(char *) * (q=MINIT));
-      else if (p == (q-2)) dirname = (char **)xrealloc(dirname,sizeof(char *) * (q+=MINC));
-      dirname[p++] = scopy(argv[i]);
+      if ( RMisdir ( argv[i] )) {
+        if (!dirname) dirname = (char **)xmalloc(sizeof(char *) * (q=MINIT));
+        else if (p == (q-2)) dirname = (char **)xrealloc(dirname,sizeof(char *) * (q+=MINC));
+        dirname[p++] = scopy(argv[i]);
+      }
     }
   }
   if (p) dirname[p] = NULL;
@@ -441,6 +480,16 @@ int main(int argc, char **argv)
 
   parse_dir_colors();
   initlinedraw(0);
+
+  // Not going to implement git configs so no core.excludesFile support.
+  if ( VCignore &&  ( stmp = getenv( "GIT_DIR" ) ) ) {
+    char *path = xmalloc( PATH_MAX );
+    snprintf( path, PATH_MAX, "%s/info/exclude", stmp );
+//  XYZZY - this is dead until you update filter.c
+//  push_filterstack( new_ignorefile( path ) );
+    free( path );
+  }
+  if ( showinfo ) push_infostack( new_infofile( INFO_PATH ) );
 
   needfulltree = duflag || pruneflag || matchdirs || fromfile;
 
@@ -514,13 +563,16 @@ int main(int argc, char **argv)
         }
       } else if (!Hflag) printit(dirname[i]);             // XYZZY - output starting directory
       if (colored) fprintf(outfile,"%s",endcode);
+//    printf( "\tListDir: %s\n", dirname[i] );            // WALDO
       if (!Hflag) size += listdir(dirname[i],&dtotal,&ftotal,0,0);
       else {
         if (chdir(dirname[i])) {
           fprintf(outfile,"%s [error opening dir]\n",dirname[i]);
           exit(1);
         } else {
+//        printf( "\tLISTDir: %s\n", "." );               // WALDO
           size += listdir(".",&dtotal,&ftotal,0,0);
+//        printf( "Size: %lld (.)\n", size );             // WALDO
           chdir(curdir);
         }
       }
@@ -537,7 +589,9 @@ int main(int argc, char **argv)
     else if (Jflag) fprintf(outfile, "{\"type\":\"directory\",\"name\": \".\",\"contents\":[");
     else if (!Hflag) fprintf(outfile,".");
     if (colored) fprintf(outfile,"%s",endcode);
+//  printf( "\tLISTdIR: %s\n", "." );                     // WALDO
     size += listdir(".",&dtotal,&ftotal,0,0);
+//  printf( "SIZE: %lld (.)\n", size );                   // WALDO
     if (Xflag) fprintf(outfile,"%s</directory>%s",noindent?"":"  ", _nl);
     if (Jflag) fprintf(outfile,"%s]}",noindent?"":"  ");
   }
@@ -666,23 +720,121 @@ void usage(int n)
 }
 
 
-struct _info **read_dir(char *dir, int *n)
-{
-  static char *path = NULL, *lbuf = NULL;
-  static long pathsize, lbufsize;
-  struct _info **dl;
-  struct dirent *ent;
-  struct stat lst,st;
-  DIR *d;
-  int ne, p = 0, len, rs;
+int patignore( char *name ) {
+  for ( int i=0; i < ipattern; i++ )
+    if ( patmatch( name, ipatterns[i] ) ) return 1;
+  return 0;
+}
+int patinclude( char *name ) {
+  for ( int i=0; i < pattern; i++ )
+    if ( patmatch( name, patterns[i] ) ) return 1;
+  return 0;
+}
+struct _info *getinfo( char *name, char *path ) {
+  static char *lbuf = NULL;
+  static int   lbufsize = 0;
+  struct _info *ent;
+  struct stat st, lst;
+  int    len, rs;
 
-  if (path == NULL) {
-    pathsize = lbufsize = strlen(dir)+4096;
-    path=xmalloc(pathsize);
-    lbuf=xmalloc(lbufsize);
+  if ( lbuf == NULL ) lbuf = xmalloc( lbufsize = PATH_MAX );
+
+//if ( lstat( path, &lst ) < 0 ) printf( "UNEXPECTED NULL\n" ); // WALDO
+  if ( lstat( path, &lst ) < 0 ) return NULL;
+
+  if ( ( lst.st_mode & S_IFMT ) == S_IFLNK ) {
+    if ( ( rs = stat( path, &st ) ) < 0 ) memset( &st, 0, sizeof( st ) );
+  } else {
+    rs = 0;
+    st.st_mode = lst.st_mode;
+    st.st_dev  = lst.st_dev;
+    st.st_ino  = lst.st_ino;
   }
 
-  *n = 1;
+#ifndef __EMX__
+//if ( VCignore && filtercheck( path, name ) ) printf( "Unexpected return\n" ); // WALDO
+  if ( VCignore && filtercheck( path, name ) ) return NULL;
+
+  if ( ( lst.st_mode & S_IFMT ) != S_IFDIR && !( lflag && ( ( st.st_mode & S_IFMT ) == S_IFDIR ) ) ) {
+//  if ( pattern && !patinclude( name ) ) printf( "Unexpected Return\n" ); // Waldo
+    if ( pattern && !patinclude( name ) ) return NULL;
+  }
+//if ( ipattern && patignore( name ) ) printf( "UNEXPECTED return\n" ); // Waldo
+  if ( ipattern && patignore( name ) ) return NULL;
+#endif
+
+//if ( dflag && ( ( st.st_mode & S_IFMT ) != S_IFDIR ) ) printf( "NotADir\n" ); // Waldo
+  if ( dflag && ( ( st.st_mode & S_IFMT ) != S_IFDIR ) ) return NULL;
+
+  ent = ( struct _info * ) xmalloc( sizeof( struct _info ) );
+  memset( ent, 0, sizeof( struct _info ) );
+
+  // Should incorporate struct stat _info and eliminate this unnecessary copying.
+  // Made sense long ago when there were fewer options and didn't need half of stat.
+
+  ent->name   = scopy( name );
+  ent->mode   = lst.st_mode;
+  ent->uid    = lst.st_uid;
+  ent->gid    = lst.st_gid;
+  ent->size   = lst.st_size;
+  ent->dev    =  st.st_dev;
+  ent->inode  =  st.st_ino;
+  ent->ldev   = lst.st_dev;
+  ent->linode = lst.st_ino;
+  ent->lnk    = NULL;
+  ent->orphan = false;
+  ent->err    = NULL;
+  ent->child  = NULL;
+
+  ent->atime  = lst.st_atime;
+  ent->ctime  = lst.st_ctime;
+  ent->mtime  = lst.st_mtime;
+
+#ifdef __EMX__
+  ent->attr   = lst.st_attr;
+#else
+  // These should be eliminated as they're barely used
+  ent->isdir  = ( ( st.st_mode &   S_IFMT ) == S_IFDIR  );
+  ent->issok  = ( ( st.st_mode &   S_IFMT ) == S_IFSOCK );
+  ent->isfifo = ( ( st.st_mode &   S_IFMT ) == S_IFIFO  );
+  ent->isexe  = (   st.st_mode & ( S_IFMT | S_IXGRP | S_IXOTH ) ) ? 1 : 0;
+
+  if ( ( lst.st_mode & S_IFMT  ) == S_IFLNK ) {
+    if ( lst.st_size+1 > lbufsize ) lbuf = xrealloc( lbuf, lbufsize = ( lst.st_size + 8192 ) );
+    if ( ( len = readlink( path, lbuf, lbufsize - 1 ) ) < 0 ) {
+      ent->lnk     = scopy( "[Error reading symbolic link information]" );
+      ent->isdir   = false;
+    } else {
+      lbuf[ len ] = 0;
+      ent->lnk = scopy( lbuf );
+      if ( rs < 0 ) ent->orphan = true;
+    }
+    ent->lnkmode = st.st_mode;
+
+  }
+#endif
+
+  ent->comment = NULL;
+
+  return ent;
+}
+
+struct _info **read_dir(char *dir, int *n, int infotop ) {
+  struct comment *com;
+  static char *path = NULL;
+  static long pathsize;
+  struct _info **dl, *info;
+  struct dirent *ent;
+  DIR *d;
+  int ne, p = 0, i,
+      es = ( dir[ strlen( dir ) -1 ] == '/' );
+
+  if (path == NULL) {
+    path = xmalloc( pathsize = strlen( dir ) + PATH_MAX );
+  }
+
+  *n = -1;
+//printf( "DIR: %s\n", dir );                                                      // WALDO
   if ((d=opendir(dir)) == NULL) return NULL;
 
   dl = (struct _info **)xmalloc(sizeof(struct _info *) * (ne = MINIT));
@@ -692,7 +844,26 @@ struct _info **read_dir(char *dir, int *n)
     if (Hflag && !strcmp(ent->d_name,"00Tree.html")) continue;
     if (!aflag && ent->d_name[0] == '.') continue;
 
-    if (strlen(dir)+strlen(ent->d_name)+2 > pathsize) path = xrealloc(path,pathsize=(strlen(dir)+strlen(ent->d_name)+4096));
+    if (strlen(dir)+strlen(ent->d_name)+2 > pathsize) path = xrealloc(path,pathsize=(strlen(dir)+strlen(ent->d_name)+PATH_MAX));
+    if ( es ) sprintf( path, "%s%s",  dir, ent->d_name );
+    else      sprintf( path, "%s/%s", dir, ent->d_name );
+
+    info = getinfo( ent->d_name, path );
+    if ( info ) {
+//    printf( "%s -> %s -> %s\n", ent->d_name, path, info ? "DATA" : "NULL" );     // WALDO
+      if ( showinfo && ( com = infocheck( path, ent->d_name, infotop )) ) {
+        for ( i = 0; com->desc[ i ] != NULL; i++ );
+        info->comment = xmalloc( sizeof( char * ) * ( i+1) );
+        for ( i = 0; com->desc[ i ] != NULL; i++ ) info->comment[i] = scopy( com->desc[i] );
+        info->comment[i] = NULL;
+      }
+      if ( p == ( ne-1 ) ) dl = ( struct _info ** ) xrealloc( dl, sizeof( struct _info * ) * ( ne += MINC ));
+      dl [ p++ ] = info;
+    }
+  }
+
+#ifdef CUT_OLDJUNK
+
     sprintf(path,"%s/%s",dir,ent->d_name);
     if (lstat(path,&lst) < 0) continue;
     if ((lst.st_mode & S_IFMT) == S_IFLNK) {
@@ -767,10 +938,35 @@ struct _info **read_dir(char *dir, int *n)
     dl[p]->isfifo = ((st.st_mode & S_IFMT) == S_IFIFO);
     dl[p++]->isexe = (st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) ? 1 : 0;
   }
-  closedir(d);
-  *n = p;
-  dl[p] = NULL;
+#endif
+
+//printf( "Closing: %s\n", dir );                       // WALDO
+  closedir( d );
+
+//printf( "check dl: %d -> %d\n", *n, p );              // WALDO
+
+  if ( ( *n = p ) == 0 ) {
+//  printf( "free dl: %d -> %d\n", *n, p );             // WALDO
+    free( dl );
+    return NULL;
+  }
+
+  dl[ p ] = NULL;
+
+//printf( "DL: %s\n", dl == NULL ? "NULL" : "Data" );   // WALDO
+
   return dl;
+
+}
+void push_files( char *dir, struct ignorefile **ig, struct infofile **inf ) {
+  if ( VCignore ) {
+    *ig = new_ignorefile( dir );
+    if ( *ig != NULL ) push_filterstack( *ig );
+  }
+  if ( showinfo ) {
+    *inf = new_infofile( dir );
+    if ( *inf != NULL ) push_infostack( *inf );
+  }
 }
 
 /* This is for all the impossible things people wanted the old tree to do.
@@ -781,11 +977,14 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 {
   char *path;
   long pathsize = 0;
+  struct ignorefile *ig  = NULL;
+  struct infofile   *inf = NULL;
   struct _info **dir, **sav, **p, *sp;
   struct stat sb;
-  int n;
   u_long lev_tmp;
-  char *tmp_pattern = NULL, *start_rel_path;
+  int n,
+      tmp_pattern = 0;
+  char *start_rel_path;
 
   *err = NULL;
   if (Level >= 0 && lev > Level) return NULL;
@@ -806,25 +1005,30 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
         break;
       }
     }
-    if (*start_rel_path && patmatch(start_rel_path,pattern) == 1) {
+    if (*start_rel_path && patinclude(start_rel_path) ) {
       tmp_pattern = pattern;
-      pattern = NULL;
+      pattern = 0;
     }
   }
-  sav = dir = read_dir(d,&n);
+
+  push_files( d, &ig, &inf );
+
+  sav = dir = read_dir(d, &n, inf != NULL );
+//printf( "read_DIR %d: %s\n", n, dir == NULL ? "NULL" : "data" );    // WALDO
   if (tmp_pattern) {
     pattern = tmp_pattern;
-    tmp_pattern = NULL;
+    tmp_pattern = 0;
   }
-  if (dir == NULL) {
-    *err = scopy("error opening dir");
+  if (dir == NULL && n < 0 ) {
+    *err = scopy("error opening dir");                          // RODDENBERRY
+//  errors++;
     return NULL;
   }
   if (n == 0) {
-    free_dir(sav);
+    if ( sav != NULL ) free_dir(sav);
     return NULL;
   }
-  path = malloc(pathsize=4096);
+  path = malloc(pathsize = PATH_MAX);
 
   if (flimit > 0 && n > flimit) {
     sprintf(path,"%d entries exceeds filelimit, not opening dir",n);
@@ -833,7 +1037,8 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
     free(path);
     return NULL;
   }
-  if (cmpfunc) qsort(dir,n,sizeof(struct _info *),cmpfunc);
+
+//if (cmpfunc) qsort(dir,n,sizeof(struct _info *),cmpfunc);
 
   if (lev >= maxdirs-1) {
     dirs = xrealloc(dirs,sizeof(int) * (maxdirs += 1024));
@@ -873,7 +1078,7 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
       }
       // prune empty folders, unless they match the requested pattern
       if (pruneflag && (*dir)->child == NULL &&
-          !(matchdirs && pattern && patmatch((*dir)->name,pattern) == 1)) {
+          !(matchdirs && pattern && patinclude((*dir)->name) )) {
         sp = *dir;
         for(p=dir;*p;p++) *p = *(p+1);
         n--;
@@ -893,11 +1098,20 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
     dir++;
   }
   dusize = loc_dusize;
+
+
+  // sorting needs to be deferred for --du
+  if ( cmpfunc ) qsort( sav, n, sizeof( struct _info * ), cmpfunc );
+//if ( topsort ) qsort( sav, n, sizeof( struct _info * ), topsort );
+
   free(path);
   if (n == 0) {
     free_dir(sav);
     return NULL;
   }
+
+  if ( ig  != NULL ) pop_filterstack();
+  if ( inf != NULL ) pop_infostack  ();
   return sav;
 }
 

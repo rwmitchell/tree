@@ -22,7 +22,12 @@
 # It is not allowed to install to /usr/bin on OS X any longer (SIP):
 prefix = /usr/local
 CC=cc
-CFLAGS=-O2 -Wall -fomit-frame-pointer -no-cpp-precomp
+# CFLAGS=-O2 -Wall -fomit-frame-pointer -no-cpp-precomp
 LDFLAGS=
 MANDIR=${prefix}/share/man/man1
 OBJS+=strverscmp.o
+
+
+CC_DEBUG_FLAGS  = -g3 -DDEBUG_ALL -fdiagnostics-show-note-include-stack -fstack-protector # -fsanitize=address
+CC_CHECK_FLAGS  = -O3 -fcolor-diagnostics -Wformat -x c -Wall -Wextra -Werror
+CC_RELEASE_FLAGS= -O3 -fcolor-diagnostics -Wformat

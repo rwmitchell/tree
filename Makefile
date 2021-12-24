@@ -18,7 +18,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-include make.$(OSTYPE)
+include make.$(OS)
 
 # Uncomment for HP/UX:
 #CC=cc
@@ -93,6 +93,8 @@ OBJ_FILES =           \
 	$(OBJ)/strverscmp.o \
 	$(OBJ)/unix.o       \
 	$(OBJ)/xml.o        \
+	$(OBJ)/filter.o     \
+	$(OBJ)/info.o       \
 
 $(NST)/%: $(DST)/%
 	install -m ugo+rx $< $@

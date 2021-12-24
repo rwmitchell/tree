@@ -73,12 +73,17 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
     dev = sb.st_dev;
   }
 
-  sav = dir = read_dir(d,&n);
+  sav = dir = read_dir(d, &n, false );  // inf != NULL );
+
+//printf( "\nREAD_DIR: %s: %d : %s\n", d, n, dir ? "DATA" : "Null" );
+
   if (!dir && n) {
-    fprintf(outfile," [error opening dir]\n");
+    fprintf(outfile," [Error opening dir: %d:%s]\n", n, d);
     return 0;
   }
-  if (!n) {
+  if ( !dir && n == 0 ) { fprintf( outfile, "\n" ); return 0; }  // no subdirs
+
+  if ( sav && n <= 0 ) {
     fputc('\n', outfile);
     free_dir(sav);
     return 0;
@@ -94,6 +99,7 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
     dirs = (int *) xrealloc(dirs,sizeof(int) * (maxdirs += 1024));
     memset(dirs+(maxdirs-1024), 0, sizeof(int) * 1024);
   }
+//printf( "DIRS: %s -> %s : %ld\n", dirs ? "DATA" : "Null", dir ? "Data" : "NULL", lev );
   dirs[lev] = 1;
   if (!*(dir+1)) dirs[lev] = 2;
   fprintf(outfile,"\n");
