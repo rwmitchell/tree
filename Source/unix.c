@@ -24,7 +24,7 @@ extern bool noindent, force_color, xdev, nolinks, flimit;
 
 extern struct _info **(*getfulltree)(char *d, u_long lev, dev_t dev, off_t *size, char **err);
 extern void (*listdir)(char *, int *, int *, u_long, dev_t);
-extern int (*cmpfunc)();
+extern int (*topsort)();
 extern FILE *outfile;
 extern int Level, *dirs, maxdirs;
 
@@ -94,7 +94,7 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
     return 0;
   }
 
-  if (cmpfunc) qsort(dir,n,sizeof(struct _info *), cmpfunc);
+  if (topsort) qsort(dir,n,sizeof(struct _info *), topsort);
   if (lev >= (u_long) maxdirs-1) {
     dirs = (int *) xrealloc(dirs,sizeof(int) * (maxdirs += 1024));
     memset(dirs+(maxdirs-1024), 0, sizeof(int) * 1024);

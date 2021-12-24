@@ -30,7 +30,7 @@ char *version ="$Version: $ tree v1.8.0 (c) 1996 - 2018 by Steve Baker, Thomas M
 bool dflag, lflag, pflag, sflag, Fflag, aflag, fflag, uflag, gflag;
 bool qflag, Nflag, Qflag, Dflag, inodeflag, devflag, hflag, Rflag;
 bool Hflag, siflag, cflag, Xflag, Jflag, duflag, pruneflag;
-bool noindent, force_color, nocolor, xdev, noreport, nolinks, flimit, dirsfirst;
+bool noindent, force_color, nocolor, xdev, noreport, nolinks, flimit;
 bool ignorecase, matchdirs, fromfile, VCignore, showinfo;
 bool reverse;
 bool lsicons = false;
@@ -49,7 +49,8 @@ const char *charset = NULL;
 
 struct _info **(*getfulltree)(char *d, u_long lev, dev_t dev, off_t *size, char **err) = unix_getfulltree;
 off_t (*listdir)(char *, int *, int *, u_long, dev_t) = unix_listdir;
-int (*cmpfunc)() = alnumsort;
+int (*basesort)() = alnumsort;
+int (*topsort) () = NULL;
 
 char *sLevel, *curdir, *outfilename = NULL;
 FILE *outfile;
@@ -91,11 +92,11 @@ struct sorts {
   char *name;
   int (*cmpfunc)();
 } sorts[] = {
-  {"name", alnumsort},
-  {"version", versort},
-  {"size", fsizesort},
-  {"mtime", mtimesort},
-  {"ctime", ctimesort},
+  {"name",    alnumsort},
+  {"version",   versort},
+  {"size",    fsizesort},
+  {"mtime",   mtimesort},
+  {"ctime",   ctimesort},
   {NULL, NULL}
 };
 
@@ -132,7 +133,7 @@ int main(int argc, char **argv)
   aflag = dflag = fflag = lflag = pflag = sflag = Fflag = uflag = gflag = false;
   Dflag = qflag = Nflag = Qflag = Rflag = hflag = Hflag = siflag = cflag = false;
   noindent   = force_color = nocolor = xdev = noreport = nolinks = reverse = false;
-  ignorecase = matchdirs = dirsfirst = inodeflag = devflag = Xflag = Jflag = false;
+  ignorecase = matchdirs = inodeflag = devflag = Xflag = Jflag = false;
   duflag     = true;
   pruneflag  = false;
   VCignore   = false;
@@ -147,12 +148,14 @@ int main(int argc, char **argv)
   setlocale(LC_COLLATE, "");
 
   charset = getcharset();
-  if (charset == NULL && strcmp(nl_langinfo(CODESET), "UTF-8") == 0) {
+  if (charset == NULL
+    && ( strcmp( nl_langinfo(CODESET), "UTF-8" ) == 0
+      || strcmp( nl_langinfo(CODESET), "utf8"  ) == 0 ) ) {
     charset = "UTF-8";
   }
 
-/* Until I get rid of this hack, make it linux/cygwin/HP nonstop only: */
-#if defined (LINUX) || defined (CYGWIN) || defined (__TANDEM)
+// Still a hack, but assume if the macro is defined, we use it
+#ifdef MB_CUR_MAX
   mb_cur_max = (int)MB_CUR_MAX;
 #else
   mb_cur_max = 1;
@@ -208,12 +211,12 @@ int main(int argc, char **argv)
         case 'A': ansilines = true;      break;
         case 'S': charset   = "IBM437";  break;
         case 'D': Dflag     = true;      break;
-        case 't': cmpfunc   = mtimesort; break;
-        case 'c': cmpfunc   = ctimesort;
+        case 't': basesort  = mtimesort; break;
+        case 'c': basesort  = ctimesort;
                   cflag     = true;      break;
         case 'r': reverse   = true;      break;
-        case 'v': cmpfunc   = versort;   break;
-        case 'U': cmpfunc   = NULL;      break;
+        case 'v': basesort  = versort;   break;
+        case 'U': basesort  = NULL;      break;
         case 'X': Hflag     = false;
                   Xflag     = true;      break;
         case 'J': Jflag     = true;      break;
@@ -284,8 +287,14 @@ int main(int argc, char **argv)
             }
             if (!strcmp("--dirsfirst",argv[i])) {
               j = strlen(argv[i])-1;
-              dirsfirst = true;
+              topsort = dirsfirst;
               break;
+            }
+            if (!strcmp("--filesfirst", argv[i])) {
+              j = strlen(argv[i])-1;
+              topsort = filesfirst;
+              break;
+
             }
             if (!strncmp("--filelimit",argv[i],11)) {
               j = 11;
@@ -399,14 +408,14 @@ int main(int argc, char **argv)
                 fprintf(stderr,"tree: missing argument to --sort\n");
                 exit(1);
               }
-              cmpfunc = NULL;
+              basesort = NULL;
               for(k=0;sorts[k].name;k++) {
                 if (strcasecmp(sorts[k].name,stmp) == 0) {
-                  cmpfunc = sorts[k].cmpfunc;
+                  basesort = sorts[k].cmpfunc;
                   break;
                 }
               }
-              if (cmpfunc == NULL) {
+              if (basesort == NULL) {
                 fprintf(stderr,"tree: sort type '%s' not valid, should be one of: ", stmp);
                 for(k=0; sorts[k].name; k++)
                   printf("%s%c", sorts[k].name, sorts[k+1].name? ',': '\n');
@@ -480,6 +489,17 @@ int main(int argc, char **argv)
 
   parse_dir_colors();
   initlinedraw(0);
+
+  // Insure sensible defaults and sanity check options:
+  if ( dirname == NULL ) {
+    dirname = xmalloc( sizeof( char * ) * 2 );
+    dirname[0] = scopy( "." );
+    dirname[1] = NULL;
+  }
+  if ( topsort == NULL ) topsort = basesort;
+  if ( timefmt ) setlocale( LC_TIME, "" );
+  if ( dflag )   pruneflag = false;       // else You'll just get nothing
+  if ( Rflag && ( Level == -1 ) ) Rflag = false;
 
   // Not going to implement git configs so no core.excludesFile support.
   if ( VCignore &&  ( stmp = getenv( "GIT_DIR" ) ) ) {
@@ -651,7 +671,8 @@ void usage(int n)
   fprintf(n < 2? stderr: stdout,
         "usage: tree [-acdfghilnpqrstuvxACDFJQNSUX] [-H baseHREF] [-T title ]\n"
         "\t[-L level [-R]] [-P pattern] [-I pattern] [-o filename] [--version]\n"
-        "\t[--help] [--inodes] [--device] [--noreport] [--nolinks] [--dirsfirst]\n"
+        "\t[--help] [--inodes]\n"
+        "\t[--device] [--noreport] [--nolinks] [--dirsfirst] [--filesfirst]\n"
         "\t[--charset charset] [--filelimit[=]#] [--si] [--timefmt[=]<f>]\n"
         "\t[--sort[=]<name>] [--matchdirs] [--ignore-case] [--fromfile] [--]\n"
         "\t[<directory list>]\n");
@@ -695,6 +716,7 @@ void usage(int n)
         "  -U            Leave files unsorted.\n"
         "  -r            Reverse the order of the sort.\n"
         "  --dirsfirst   List directories before files (-U disables).\n"
+        "  --filesfirst  List files before directories (-U disables).\n"
         "  --sort X      Select sort: name,version,size,mtime,ctime.\n"
         "  ------- Graphics options -------\n"
         "  -i            Don't print indentation lines.\n"
@@ -1102,8 +1124,8 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 
 
   // sorting needs to be deferred for --du
-  if ( cmpfunc ) qsort( sav, n, sizeof( struct _info * ), cmpfunc );
-//if ( topsort ) qsort( sav, n, sizeof( struct _info * ), topsort );
+//if ( basesort ) qsort( sav, n, sizeof( struct _info * ), basesort );
+  if ( topsort  ) qsort( sav, n, sizeof( struct _info * ), topsort );
 
   free(path);
   if (n == 0) {
@@ -1117,25 +1139,28 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 }
 
 /* Sorting functions */
+// filesfirst and dirsfirst are now top-level meta-sorts.
+int filesfirst( struct _info **a, struct _info **b ) {
+  if ( ( *a )->isdir != ( *b )->isdir ) {
+    return ( *a )->isdir ? 1 : -1;
+  }
+  return( basesort( a, b ) );
+}
+int dirsfirst( struct _info **a, struct _info **b ) {
+  if ( ( *a )->isdir != ( *b )->isdir ) {
+    return ( *a )->isdir ? -1 : 1;
+  }
+  return( basesort( a, b ) );
+}
 int alnumsort(struct _info **a, struct _info **b)
 {
-  int v;
-
-  if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
-    return (*a)->isdir ? -1 : 1;
-  }
-  v = strcoll((*a)->name,(*b)->name);
+  int v = strcoll((*a)->name,(*b)->name);
   return reverse? -v : v;
 }
 
 int versort(struct _info **a, struct _info **b)
 {
-  int v;
-
-  if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
-    return (*a)->isdir ? -1 : 1;
-  }
-  v = strverscmp((*a)->name,(*b)->name);
+  int v = strverscmp((*a)->name,(*b)->name);
   return reverse? -v : v;
 }
 
@@ -1143,9 +1168,6 @@ int mtimesort(struct _info **a, struct _info **b)
 {
   int v;
 
-  if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
-    return (*a)->isdir ? -1 : 1;
-  }
   if ((*a)->mtime == (*b)->mtime) {
     v = strcoll((*a)->name,(*b)->name);
     return reverse? -v : v;
@@ -1158,9 +1180,6 @@ int ctimesort(struct _info **a, struct _info **b)
 {
   int v;
 
-  if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
-    return (*a)->isdir ? -1 : 1;
-  }
   if ((*a)->ctime == (*b)->ctime) {
     v = strcoll((*a)->name,(*b)->name);
     return reverse? -v : v;
@@ -1176,12 +1195,7 @@ int sizecmp(off_t a, off_t b)
 
 int fsizesort(struct _info **a, struct _info **b)
 {
-  int v;
-
-  if (dirsfirst && ((*a)->isdir != (*b)->isdir)) {
-    return (*a)->isdir ? -1 : 1;
-  }
-  v = sizecmp((*a)->size, (*b)->size);
+  int v = sizecmp((*a)->size, (*b)->size);
   if (v == 0) v = strcoll((*a)->name,(*b)->name);
   return reverse? -v : v;
 }
