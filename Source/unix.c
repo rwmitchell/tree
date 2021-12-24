@@ -104,7 +104,7 @@ off_t unix_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
   if (!*(dir+1)) dirs[lev] = 2;
   fprintf(outfile,"\n");
 
-  path = (char *) malloc(pathsize=4096);
+  path = (char *) malloc(pathsize=PATH_MAX);
 
   while(*dir) {
 
@@ -229,7 +229,7 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
   if (!*(dir+1)) dirs[lev] = 2;
   fprintf(outfile,"\n");
 
-  path = (char *) malloc(pathsize=4096);
+  path = (char *) malloc(pathsize=PATH_MAX);
 
   while(*dir) {
 

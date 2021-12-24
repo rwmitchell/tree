@@ -138,7 +138,7 @@ int main(int argc, char **argv)
   VCignore   = false;
   showinfo   = false;
   flimit = 0;
-  dirs = (int *) xmalloc(sizeof(int) * (maxdirs=4096));
+  dirs = (int *) xmalloc(sizeof(int) * (maxdirs=PATH_MAX));
   memset(dirs, 0, sizeof(int) * maxdirs);
   dirs[0] = 0;
   Level = -1;

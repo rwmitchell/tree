@@ -93,7 +93,7 @@ off_t json_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
   if (!*(dir+1)) dirs[lev] = 2;
   if (!noindent) fprintf(outfile,"\n");
 
-  path = (char *) malloc(pathsize=4096);
+  path = (char *) malloc(pathsize=PATH_MAX);
 
   while(*dir) {
     if (!noindent) json_indent(lev);
@@ -208,7 +208,7 @@ void jsonr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
   if (!*(dir+1)) dirs[lev] = 2;
   if (!noindent) fprintf(outfile,"\n");
 
-  path = (char *) malloc(pathsize=4096);
+  path = (char *) malloc(pathsize=PATH_MAX);
 
   while(*dir) {
     if (!noindent) json_indent(lev);

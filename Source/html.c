@@ -114,7 +114,7 @@ off_t html_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
   if (!*(dir+1)) dirs[lev] = 2;
   fprintf(outfile,"<br>\n");
 
-  path = malloc(pathsize=4096);
+  path = malloc(pathsize=PATH_MAX);
 
   while(*dir) {
     if (!noindent) indent(lev);
@@ -280,7 +280,7 @@ void htmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
   if (!*(dir+1)) dirs[lev] = 2;
   fprintf(outfile,"<br>\n");
 
-  path = malloc(pathsize=4096);
+  path = malloc(pathsize=PATH_MAX);
 
   while(*dir) {
     if (!noindent) indent(lev);

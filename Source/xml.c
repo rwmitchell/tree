@@ -102,7 +102,7 @@ off_t xml_listdir(char *d, int *dt, int *ft, u_long lev, dev_t dev)
   if (!*(dir+1)) dirs[lev] = 2;
   if (!noindent) fprintf(outfile,"\n");
 
-  path = (char *) malloc(pathsize=4096);
+  path = (char *) malloc(pathsize=PATH_MAX);
 
   while(*dir) {
     if (!noindent) xml_indent(lev);
@@ -207,7 +207,7 @@ void xmlr_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
   if (!*(dir+1)) dirs[lev] = 2;
   fprintf(outfile,"\n");
 
-  path = (char *) malloc(pathsize=4096);
+  path = (char *) malloc(pathsize=PATH_MAX);
 
   while(*dir) {
     if (!noindent) xml_indent(lev);
