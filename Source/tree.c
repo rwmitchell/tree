@@ -884,98 +884,15 @@ struct _info **read_dir(char *dir, int *n, int infotop ) {
     }
   }
 
-#ifdef CUT_OLDJUNK
-
-    sprintf(path,"%s/%s",dir,ent->d_name);
-    if (lstat(path,&lst) < 0) continue;
-    if ((lst.st_mode & S_IFMT) == S_IFLNK) {
-      if ((rs = stat(path,&st)) < 0) memset(&st, 0, sizeof(st));
-    } else {
-      rs = 0;
-      st.st_mode = lst.st_mode;
-      st.st_dev = lst.st_dev;
-      st.st_ino = lst.st_ino;
-    }
-
-#ifndef __EMX__
-    if ((lst.st_mode & S_IFMT) != S_IFDIR && !(lflag && ((st.st_mode & S_IFMT) == S_IFDIR))) {
-      if (pattern && patmatch(ent->d_name,pattern) != 1) continue;
-    }
-    if (ipattern && patmatch(ent->d_name,ipattern) == 1) continue;
-#endif
-
-    if ( duflag && dflag ) dusize += lst.st_size;
-    if (dflag && ((st.st_mode & S_IFMT) != S_IFDIR)) continue;
-#ifndef __EMX__
-//    if (pattern && ((lst.st_mode & S_IFMT) == S_IFLNK) && !lflag) continue;
-#endif
-
-    if (p == (ne-1)) dl = (struct _info **)xrealloc(dl,sizeof(struct _info *) * (ne += MINC));
-    dl[p] = (struct _info *)xmalloc(sizeof(struct _info));
-
-    dl[p]->name = scopy(ent->d_name);
-    /* We should just incorporate struct stat into _info, and elminate this unecessary copying.
-     * Made sense long ago when we had fewer options and didn't need half of stat.
-     */
-    dl[p]->mode = lst.st_mode;
-    dl[p]->uid = lst.st_uid;
-    dl[p]->gid = lst.st_gid;
-    dl[p]->size = lst.st_size;
-    dl[p]->dev = st.st_dev;
-    dl[p]->inode = st.st_ino;
-    dl[p]->ldev = lst.st_dev;
-    dl[p]->linode = lst.st_ino;
-    dl[p]->lnk = NULL;
-    dl[p]->orphan = false;
-    dl[p]->err = NULL;
-    dl[p]->child = NULL;
-
-    dl[p]->atime = lst.st_atime;
-    dl[p]->ctime = lst.st_ctime;
-    dl[p]->mtime = lst.st_mtime;
-
-#ifdef __EMX__
-    dl[p]->attr = lst.st_attr;
-#else
-
-    if ((lst.st_mode & S_IFMT) == S_IFLNK) {
-      if (lst.st_size+1 > lbufsize) lbuf = xrealloc(lbuf,lbufsize=(lst.st_size+8192));
-      if ((len=readlink(path,lbuf,lbufsize-1)) < 0) {
-        dl[p]->lnk = scopy("[Error reading symbolic link information]");
-        dl[p]->isdir = false;
-        dl[p++]->lnkmode = st.st_mode;
-        continue;
-      } else {
-        lbuf[len] = 0;
-        dl[p]->lnk = scopy(lbuf);
-        if (rs < 0) dl[p]->orphan = true;
-        dl[p]->lnkmode = st.st_mode;
-      }
-    }
-#endif
-
-    /* These should be elminiated, as they're barely used */
-    dl[p]->isdir = ((st.st_mode & S_IFMT) == S_IFDIR);
-    dl[p]->issok = ((st.st_mode & S_IFMT) == S_IFSOCK);
-    dl[p]->isfifo = ((st.st_mode & S_IFMT) == S_IFIFO);
-    dl[p++]->isexe = (st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)) ? 1 : 0;
-  }
-#endif
-
-//printf( "Closing: %s\n", dir );                       // WALDO
   closedir( d );
 
-//printf( "check dl: %d -> %d\n", *n, p );              // WALDO
 
   if ( ( *n = p ) == 0 ) {
-//  printf( "free dl: %d -> %d\n", *n, p );             // WALDO
     free( dl );
     return NULL;
   }
 
   dl[ p ] = NULL;
-
-//printf( "DL: %s\n", dl == NULL ? "NULL" : "Data" );   // WALDO
 
   return dl;
 
