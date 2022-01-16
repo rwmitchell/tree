@@ -31,3 +31,4 @@ I've customized it for features I wanted.  The original code has also continued 
 ## Screenshots
 ![tree](img/tree.png)
 ![vdir](img/vdir.png)
+![vdir-size+date](img/vdir-size+date.png)
