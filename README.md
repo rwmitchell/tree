@@ -32,4 +32,9 @@ I've customized it for features I wanted.  The original code has also continued 
 ![tree](img/tree.png)
 ![vdir](img/vdir.png)
 ![vdir-size+date](img/vdir-size+date.png)
+
+## Comparison
+Comparison between the original tree (2.0.0) with this version.
+Both run using ```tree -Ds```
+
 ![compare](img/compare.png)
