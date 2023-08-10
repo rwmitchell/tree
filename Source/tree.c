@@ -49,12 +49,13 @@ const char *charset = NULL;
 
 struct _info **(*getfulltree)(char *d, u_long lev, dev_t dev, off_t *size, char **err) = unix_getfulltree;
 off_t (*listdir)(char *, int *, int *, u_long, dev_t) = unix_listdir;
-int (*basesort)() = alnumsort;
+int (*basesort)(struct _info **a, struct _info **b) = alnumsort;
 int (*topsort) () = NULL;
 
 char *sLevel, *curdir, *outfilename = NULL;
 FILE *outfile;
-int Level, *dirs, maxdirs;
+long long Level;
+int *dirs, maxdirs;
 
 int mb_cur_max;
 
@@ -844,7 +845,7 @@ struct _info *getinfo( char *name, char *path ) {
 struct _info **read_dir(char *dir, int *n, int infotop ) {
   struct comment *com;
   static char *path = NULL;
-  static long pathsize;
+  static u_long pathsize;
   struct _info **dl, *info;
   struct dirent *ent;
   DIR *d;
@@ -915,7 +916,7 @@ void push_files( char *dir, struct ignorefile **ig, struct infofile **inf ) {
 struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, char **err)
 {
   char *path;
-  long pathsize = 0;
+  u_long pathsize = 0;
   struct ignorefile *ig  = NULL;
   struct infofile   *inf = NULL;
   struct _info **dir, **sav, **p, *sp;
@@ -926,7 +927,7 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
   char *start_rel_path;
 
   *err = NULL;
-  if (Level >= 0 && lev > Level) return NULL;
+  if (Level >= 0 && lev > (u_long) Level) return NULL;
   if (xdev && lev == 0) {
     stat(d,&sb);
     dev = sb.st_dev;
@@ -953,7 +954,7 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
   push_files( d, &ig, &inf );
 
   sav = dir = read_dir(d, &n, inf != NULL );
-//printf( "read_DIR %d: %s\n", n, dir == NULL ? "NULL" : "data" );    // WALDO
+//printf( "read_DIR %d: %s\n", n, dir == NULL ? "NULL" : d );  // "data" );    // WALDO
   if (tmp_pattern) {
     pattern = tmp_pattern;
     tmp_pattern = 0;
@@ -979,7 +980,7 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
 
 //if (cmpfunc) qsort(dir,n,sizeof(struct _info *),cmpfunc);
 
-  if (lev >= maxdirs-1) {
+  if (lev >= (u_long) maxdirs-1) {
     dirs = xrealloc(dirs,sizeof(int) * (maxdirs += 1024));
   }
 
