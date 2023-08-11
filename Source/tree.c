@@ -560,7 +560,7 @@ int main(int argc, char **argv)
 //fprintf( outfile, "Tree: " );         // RWM: only output for plain text
 
   // This block outputs the working directory at the top - RWM
-  firstdir = dirname[0];
+  firstdir = "."; // curdir;   // dirname[0];
   firstdir = get_dirname( firstdir );
   if (colorize) colored = fprintf( outfile, "%s", TRCOLOR );
   fprintf(outfile, "%s\n",  firstdir );
