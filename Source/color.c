@@ -326,7 +326,7 @@ void color_256( FILE *fout, char *code, char *glyph ) {
         rc;
     rc = sscanf( code, "%d;%d;%d", &f, &b, &s );
     fprintf( fout, "%s%d%s", forecode, f, rightcode );
-    fprintf( fout,"%s ", glyph ? glyph : "A");
+    fprintf( fout,"%s  ", glyph ? glyph : "A");         // XYZZY/ - put 2 spaces after glyph ( rocket glyph needs extra space )
   } else
     fprintf(outfile,"%s%s%s",leftcode,code,rightcode);
 }
@@ -633,23 +633,23 @@ void initlinedraw(int flag) {
     "windows-1256", "windows-1256", "windows-1257", NULL
   };
   static const struct linedraw cstable[]={
-    { latin1_3,    "|  ",              "|--",            "&middot;--",     "&copy;"   },
-    { iso8859_789, "|  ",              "|--",            "&middot;--",     "(c)"      },
-    { shift_jis,   "\204\240 ",        "\204\245",       "\204\244",       "(c)"      },
-    { euc_jp,      "\250\242 ",        "\250\247",       "\250\246",       "(c)"      },
-    { euc_kr,      "\246\242 ",        "\246\247",       "\246\246",       "(c)"      },
-    { iso2022jp,   "\033$B(\"\033(B ", "\033$B('\033(B", "\033$B(&\033(B", "(c)"      },
-    { ibm_pc,      "\263  ",           "\303\304\304",   "\300\304\304",   "(c)"      },
-    { ibm_ps2,     "\263  ",           "\303\304\304",   "\300\304\304",   "\227"     },
-    { ibm_gr,      "\263  ",           "\303\304\304",   "\300\304\304",   "\270"     },
-    { gb,          "\251\246 ",        "\251\300",       "\251\270",       "(c)"      },
+    { latin1_3,    "|  ",              "|--",            "&middot;--",     "&copy;", NULL, NULL, NULL, NULL, NULL,   },
+    { iso8859_789, "|  ",              "|--",            "&middot;--",     "(c)",    NULL, NULL, NULL, NULL, NULL,   },
+    { shift_jis,   "\204\240 ",        "\204\245",       "\204\244",       "(c)",    NULL, NULL, NULL, NULL, NULL,   },
+    { euc_jp,      "\250\242 ",        "\250\247",       "\250\246",       "(c)",    NULL, NULL, NULL, NULL, NULL,   },
+    { euc_kr,      "\246\242 ",        "\246\247",       "\246\246",       "(c)",    NULL, NULL, NULL, NULL, NULL,   },
+    { iso2022jp,   "\033$B(\"\033(B ", "\033$B('\033(B", "\033$B(&\033(B", "(c)",    NULL, NULL, NULL, NULL, NULL,   },
+    { ibm_pc,      "\263  ",           "\303\304\304",   "\300\304\304",   "(c)",    NULL, NULL, NULL, NULL, NULL,   },
+    { ibm_ps2,     "\263  ",           "\303\304\304",   "\300\304\304",   "\227",   NULL, NULL, NULL, NULL, NULL,   },
+    { ibm_gr,      "\263  ",           "\303\304\304",   "\300\304\304",   "\270",   NULL, NULL, NULL, NULL, NULL,   },
+    { gb,          "\251\246 ",        "\251\300",       "\251\270",       "(c)",    NULL, NULL, NULL, NULL, NULL,   },
     { utf8,        "\342\224\202\302\240\302\240",
-    "\342\224\234\342\224\200\342\224\200", "\342\224\224\342\224\200\342\224\200", "\302\251" },
-    { big5,        "\242x ",           "\242u",          "\242|",          "(c)"      },
-    { viscii,      "|  ",              "|--",            "`--",            "\371"     },
-    { koi8ru,      "\201  ",           "\206\200\200",   "\204\200\200",   "\277"     },
-    { windows,     "|  ",              "|--",            "`--",            "\251"     },
-    { NULL,        "|  ",              "|--",            "`--",            "(c)"      }
+    "\342\224\234\342\224\200\342\224\200", "\342\224\224\342\224\200\342\224\200", "\302\251",    NULL, NULL, NULL, NULL, NULL, },
+    { big5,        "\242x ",           "\242u",          "\242|",          "(c)",    NULL, NULL, NULL, NULL, NULL,   },
+    { viscii,      "|  ",              "|--",            "`--",            "\371",   NULL, NULL, NULL, NULL, NULL,   },
+    { koi8ru,      "\201  ",           "\206\200\200",   "\204\200\200",   "\277",   NULL, NULL, NULL, NULL, NULL,   },
+    { windows,     "|  ",              "|--",            "`--",            "\251",   NULL, NULL, NULL, NULL, NULL,   },
+    { NULL,        "|  ",              "|--",            "`--",            "(c)",    NULL, NULL, NULL, NULL, NULL,   }
   };
   const char**s;
 
