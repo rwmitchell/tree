@@ -204,6 +204,8 @@ struct _info **read_dir(char *, int *);
 struct _info **read_dir(char *, int *, int );
 #endif
 
+char *get_dirname( const char *name );                // From unix.c
+
 int filesfirst( struct _info **, struct _info ** );
 int  dirsfirst( struct _info **, struct _info ** );
 int alnumsort(struct _info **, struct _info **);

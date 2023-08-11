@@ -558,6 +558,15 @@ int main(int argc, char **argv)
     fputc('[',outfile);
 
 //fprintf( outfile, "Tree: " );         // RWM: only output for plain text
+
+  // This block outputs the working directory at the top - RWM
+  firstdir = dirname[0];
+  firstdir = get_dirname( firstdir );
+  if (colorize) colored = fprintf( outfile, "%s", TRCOLOR );
+  fprintf(outfile, "%s\n",  firstdir );
+  if (colored) fprintf(outfile,"%s",COL_clr);
+  // --- End Block
+
   if (dirname) {
     firstdir = dirname[0];
     for(colored=i=0;dirname[i];i++,colored=0) {

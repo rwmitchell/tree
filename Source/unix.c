@@ -243,7 +243,7 @@ void r_listdir(struct _info **dir, char *d, int *dt, int *ft, u_long lev)
       if (colorize) colored = fprintf( outfile, "%s", TRCOLOR );
 #endif
       firstdir = get_dirname( firstdir );
-      fprintf(outfile, "%*s%s\n", n, n ? " " : "", firstdir );
+//    fprintf(outfile, "%*s%s\n", n, n ? " " : "", firstdir );     // rwm XYZZY - prints full path near top
 #ifdef  USE_PROPER_COLOR
       if (colored) fprintf(outfile,"%s",endcode);
 #else
