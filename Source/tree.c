@@ -55,6 +55,7 @@ int (*topsort) () = NULL;
 char *sLevel, *curdir, *outfilename = NULL;
 FILE *outfile;
 long long Level;
+u_long   mLevel=0;  // 2024-08-07: maximum level descended - RWM
 int *dirs, maxdirs;
 
 int mb_cur_max;
@@ -650,8 +651,10 @@ int main(int argc, char **argv)
       if (dflag)
         fprintf(outfile,"%s%d%s director%s\n",FSCOLOR, dtotal,COL_clr, (dtotal==1? "y":"ies"));
       else
-        fprintf(outfile,"%s%d%s director%s, %s%d%s file%s\n",
-          FSCOLOR, dtotal,COL_clr, (dtotal==1? "y":"ies"),FSCOLOR,ftotal,COL_clr,(ftotal==1? "":"s"));
+        fprintf(outfile,"%s%d%s director%s, %s%d%s file%s, %s%lu%s level%s\n",
+          FSCOLOR, dtotal,COL_clr, (dtotal==1? "y":"ies"),
+          FSCOLOR,ftotal,COL_clr,(ftotal==1? "":"s"),
+          FSCOLOR,mLevel,COL_clr,(mLevel==1? "":"s"));
     }
   }
 
@@ -934,6 +937,8 @@ struct _info **unix_getfulltree(char *d, u_long lev, dev_t dev, off_t *size, cha
   int n,
       tmp_pattern = 0;
   char *start_rel_path;
+
+  mLevel = mLevel < lev ? lev : mLevel;   // assign max value
 
   *err = NULL;
   if (Level >= 0 && lev > (u_long) Level) return NULL;
