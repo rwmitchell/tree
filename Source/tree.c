@@ -649,7 +649,9 @@ int main(int argc, char **argv)
         fprintf(outfile,"\n%s%s used in ", sizebuf, hflag || siflag? "" : " bytes");
       } else fputc('\n', outfile);
       if (dflag)
-        fprintf(outfile,"%s%d%s director%s\n",FSCOLOR, dtotal,COL_clr, (dtotal==1? "y":"ies"));
+        fprintf(outfile,"%s%d%s director%s, %s%lu%s level%s\n",
+          FSCOLOR, dtotal,COL_clr, (dtotal==1? "y":"ies"),
+          FSCOLOR,mLevel,COL_clr,(mLevel==1? "":"s"));
       else
         fprintf(outfile,"%s%d%s director%s, %s%d%s file%s, %s%lu%s level%s\n",
           FSCOLOR, dtotal,COL_clr, (dtotal==1? "y":"ies"),
