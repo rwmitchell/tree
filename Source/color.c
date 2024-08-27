@@ -111,7 +111,7 @@ void parse_dir_colors() {
 
   arg = split(colors,":",&n);
 
-  int ext_cnt=0;
+//int ext_cnt=0;
 
   for(i=0;arg[i];i++) {
     c = split(arg[i],"=",&n);
@@ -127,8 +127,11 @@ void parse_dir_colors() {
       }
     }
 
+//  if ( cmd( c[0] ) == COL_NORMAL )
+//    fprintf( stdout, "1: >%s< : >%s< : %s : %s\n", norm_flgs, *c, c[0], c[1] );
+
     switch( cmd( c[0] ) ) {
-      case COL_NORMAL: if (c[1]) norm_flgs = scopy(c[1]); break;
+      case COL_NORMAL: if (c[1]) norm_flgs = scopy("7;0;0"); break;  // Override  LS_ICONS value
       case COL_FILE:   if (c[1]) file_flgs = scopy(c[1]); break;
       case COL_DIR:    if (c[1])  dir_flgs = scopy(c[1]); break;
       case COL_LINK:
@@ -168,9 +171,11 @@ void parse_dir_colors() {
           }
           e->nxt      = ext;
           ext         = e;
-          ext_cnt++;
+//        ext_cnt++;
         }
     }
+//  if ( cmd( c[0] ) == COL_NORMAL )
+//    fprintf( stdout, "2: >%s< : >%s<\n", norm_flgs, *c );
     free(c);
   }
 //for ( i=0; i<ERROR; ++i ) if ( all_glyph[i] ) printf( "%3d: %s\n", i, all_glyph[i] );
@@ -183,7 +188,11 @@ void parse_dir_colors() {
   if (!norm_flgs) norm_flgs = scopy("00");
 
   if (!endcode) {
-    sprintf(buf,"%s%s%s",leftcode,norm_flgs,rightcode);
+//  fprintf( stderr, "L: >%s<\n", leftcode );
+//  fprintf( stderr, "N: >%s<\n", norm_flgs );
+//  fprintf( stderr, "R: >%s<\n", rightcode );
+    sprintf(buf,"%s%s%s",leftcode,"0",rightcode);
+//  sprintf(buf,"%s%s%s",leftcode,norm_flgs,rightcode);
     endcode = scopy(buf);
   }
 
@@ -325,8 +334,10 @@ void color_256( FILE *fout, char *code, char *glyph ) {
     int f, b, s,   // fg, bg, style
         rc;
     rc = sscanf( code, "%d;%d;%d", &f, &b, &s );
-    fprintf( fout, "%s%d%s", forecode, f, rightcode );
-    fprintf( fout,"%s  ", glyph ? glyph : "A");         // XYZZY/ - put 2 spaces after glyph ( rocket glyph needs extra space )
+    if ( rc > 0 ) {
+      fprintf( fout, "%s%d%s", forecode, f, rightcode );
+      fprintf( fout,"%s  ", glyph ? glyph : "A");         // XYZZY/ - put 2 spaces after glyph ( rocket glyph needs extra space )
+    }
   } else
     fprintf(outfile,"%s%s%s",leftcode,code,rightcode);
 }
@@ -495,6 +506,7 @@ int color(u_short mode, char *name, bool orphan, bool islink) {
         }
       }
       // default if nothing above matched
+//    fprintf( stderr, "n: >%s<\n", norm_flgs );
       if ( lsicons )
         color_256( outfile, norm_flgs, all_glyph[ COL_FILE ] );
       return false;
