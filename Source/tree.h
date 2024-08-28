@@ -28,6 +28,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/mount.h>    // statfs()
 #include <dirent.h>
 #include <ctype.h>
 #include <unistd.h>
@@ -50,6 +51,10 @@
    */
 #  define getcwd _getcwd2
 #  define chdir _chdir2
+#endif
+
+#ifdef LINUX
+#include <sys/statfs.h>
 #endif
 
 #include <locale.h>
@@ -85,7 +90,7 @@
 #if ( !defined  bool ) && ( !defined _Bool )
   typedef enum {FALSE=0, TRUE} bool;
 #else
-  enum { FALSE=false, TRUE=true };
+//typedef enum { FALSE=false, TRUE=true };
 // typedef int bool;
 #endif
 

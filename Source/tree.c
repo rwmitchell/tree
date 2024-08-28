@@ -34,6 +34,7 @@ bool noindent, force_color, nocolor, xdev, noreport, nolinks, flimit;
 bool ignorecase, matchdirs, fromfile, VCignore, showinfo;
 bool reverse;
 bool lsicons = false;
+bool exfat = false;   // RWM: Don't check file perms on exfat filesystems
 char *host = NULL;
 
 int  pattern = 0, maxpattern  = 0,
@@ -786,6 +787,19 @@ struct _info *getinfo( char *name, char *path ) {
     st.st_mode = lst.st_mode;
     st.st_dev  = lst.st_dev;
     st.st_ino  = lst.st_ino;
+
+    struct statfs fsbuf;                  // copied from els.c
+    if ( statfs( path, &fsbuf ) == 0 ) {
+//      printf( "\nFS Type: %0X\n", fsbuf.f_type );
+        // 0x001C is type smbfs  - Big Sur  ?
+        // 0x001E is type smbfs  - Monterey ? - 2022-04-29
+        // 0x0020 is type msdos  - Ventura / usb stick ? 2024-03-12
+        if ( fsbuf.f_type == 0x001E       // exfat
+          || fsbuf.f_type == 0x001F       // msdos
+          || fsbuf.f_type == 0x0020 )     // msdos also
+          exfat = TRUE;
+    }
+//  fprintf( stderr, "Dv: %d %0x\n", exfat, fsbuf.f_type );
   }
 
 #ifndef __EMX__

@@ -74,7 +74,7 @@ char **split(char *str, const char *delim, int *nwrds);
 int cmd(char *s);
 
 extern FILE *outfile;
-extern bool Hflag, force_color, nocolor, lsicons;
+extern bool Hflag, force_color, nocolor, lsicons, exfat;
 extern const char *charset;
 
 void parse_dir_colors() {
@@ -469,10 +469,12 @@ int color(u_short mode, char *name, bool orphan, bool islink) {
         return true;
       }
       if (!exec_flgs) return false;      // needs 'ex' in LSICONS
-      if (mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
+
+      if ( ! exfat && mode & (S_IXUSR | S_IXGRP | S_IXOTH)) {
         color_256( outfile, exec_flgs, all_glyph[ COL_EXEC ] );
         return true;
       }
+
       /* not a directory, link, special device, etc, so check for extension match */
       char *pt,
            *tname = strdup( name );
